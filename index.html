@@ -127,6 +127,7 @@
             <label class="tog click-only" title="Click while tapping"><input type="checkbox" id="clickOn" checked aria-label="Click while tapping"><i class="i i-metronome"></i></label>
             <label class="tog free-only" hidden title="Tempo hint"><input type="checkbox" id="tempoHint" aria-label="Tempo hint"> ≈ <span id="hintBpm">96</span> BPM</label>
             <label class="tog"><input type="checkbox" id="autoStop" checked> <span id="autoStopLbl">Stop after 2 silent bars</span></label>
+            <label class="tog" title="After a take, scroll down to the notation"><input type="checkbox" id="jumpToResult" checked> <span>Jump to the notation when stopped</span></label>
             <label title="Mic sensitivity"><i class="i i-mic"></i> <input type="range" id="micSens" min="1" max="10" step="1" value="5" aria-label="Mic sensitivity"></label>
           </div>
         </div>
@@ -157,12 +158,20 @@
         <label class="vol" title="Metronome volume"><i class="i i-sound"></i> <input type="range" class="click-vol" min="0" max="150" step="5" value="100" aria-label="Metronome volume"><span class="val">100%</span></label>
       </div>
       <div class="pr-custom" id="prCustom" hidden></div>
+      <details class="more pr-mixbox" id="prMixBox">
+        <summary>Rhythm mix <span class="more-hint" id="prMixHint"></span></summary>
+        <div class="more-body">
+          <p class="ib-note">Turn a kind of rhythm up or down without removing it.</p>
+          <div class="pr-mix" id="prMix"></div>
+          <button class="btn" id="prMixReset">Reset to normal</button>
+        </div>
+      </details>
       <div class="pr-stage" id="prStage" role="button" aria-label="Rhythm tap pad">
         <div class="pr-title" id="prTitle">Rhythm</div>
         <div class="pr-roll" id="prRoll"><div id="prScore"></div></div>
         <div class="pr-head" id="prHead"></div>
         <div class="dots" id="prDots"></div>
-        <div class="pr-msg" id="prMsg">Press space, click here or press Start. After one bar of count-in, play the rhythm as the line passes it. Any letter key taps: alternate keys for fast notes.</div>
+        <div class="pr-msg" id="prMsg">Space, a click here or Start begins: one bar of count-in, then play as the line passes. Any letter key taps. Drag sideways to look ahead.</div>
       </div>
       <div class="row pr-actions">
         <button class="btn primary" id="prStart"><span class="ic">●</span> Start</button>

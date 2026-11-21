@@ -4,7 +4,7 @@
 import { S, calib } from '../state.js';
 import { METERS } from '../core/meters.js';
 import { toAbc, exercise } from '../core/rhythmCode.js';
-import { generate, scoreRun, noteTimes, windows, groupsFor, levelName, MAX_LEVEL, GOOD_MS } from '../core/practice.js';
+import { generate, scoreRun, noteTimes, windows, groupsFor, levelName, MAX_LEVEL, GOOD_MS, MIX, MIX_NAMES } from '../core/practice.js';
 import { T, plural } from '../services/i18n.js';
 import { store } from '../services/store.js';
 import { audio, ctx, audioToPerf } from '../audio/context.js';
@@ -19,7 +19,7 @@ import { buildDots } from '../ui/beatDots.js';
 import { fillMeterSelect } from './meterPicker.js';
 import { BPM_MIN, BPM_MAX } from './tempo.js';
 
-const P = { mode: 'tap', level: 2, custom: ['basic', 'eighths'], bpm: 100, meter: '4/4', bars: 8, click: true };
+const P = { mode: 'tap', level: 2, custom: ['basic', 'eighths'], bpm: 100, meter: '4/4', bars: 8, click: true, mix: {} };  // mix: group -> MIX index
 let R = null;      // the current rhythm (rhythm-code object), its seed and note times
 let view = null;   // the drawn line: { pts: [[ms, x]], heads: [[el]] per note, width }
 let run = null;    // a run in progress: { start, notes, win, taps, done: Set, raf }
@@ -50,7 +50,8 @@ export function practiceUp(time, key) {
 
 // ---------- rhythm and drawing ----------
 function newRhythm(seed = (Math.random() * 2 ** 31) >>> 0) {
-  R = generate({ meter: P.meter, bpm: P.bpm, bars: P.bars, level: P.level, custom: P.level === 0 ? P.custom : null, seed });
+  const mix = Object.fromEntries(Object.entries(P.mix).map(([g, k]) => [g, MIX[k] ?? 1]));
+  R = generate({ meter: P.meter, bpm: P.bpm, bars: P.bars, level: P.level, custom: P.level === 0 ? P.custom : null, mix, seed });
   R.seed = seed;
   R.times = noteTimes(R);
   draw();
@@ -98,13 +99,17 @@ function xAt(t) {
 }
 // Move the line and the playhead: the head travels to 30 % of the stage, then the music scrolls under it, and at
 // the end the music stops and the head runs on to the last barline.
-function place(t) {
+function place(t, manual = null) {
   if (!view) return;
-  const stageW = $('#prStage').clientWidth, pad = 10, X = xAt(Math.max(0, t));
-  const off = Math.max(0, Math.min(X - stageW * 0.3, view.width - stageW + 2 * pad));
+  const stageW = $('#prStage').clientWidth, pad = 10, X = xAt(Math.max(0, t)), maxOff = Math.max(0, view.width - stageW + 2 * pad);
+  const off = manual != null ? Math.max(0, Math.min(manual, maxOff)) : Math.max(0, Math.min(X - stageW * 0.3, maxOff));
+  view.off = off; view.headT = t;
   $('#prRoll').style.transform = `translateX(${pad - off}px)`;
   $('#prHead').style.left = (pad + X - off) + 'px';
 }
+// While nothing plays, the line can be scrolled by hand (wheel, trackpad, dragging); the playhead stays at its time.
+const busy = () => !!run || listenBag.length > 0;
+function scrollLine(dx) { if (!view || busy()) return; place(view.headT ?? -1, (view.off || 0) + dx); }
 
 const mark = (i, cls) => view?.heads[i]?.forEach(e => { e.classList.remove('pr-good', 'pr-ok', 'pr-miss'); e.classList.add(cls); });
 function clearMarks() { $$('#prScore .pr-good, #prScore .pr-ok, #prScore .pr-miss').forEach(e => e.classList.remove('pr-good', 'pr-ok', 'pr-miss')); }
@@ -258,6 +263,18 @@ function fillLevels() {
   box.innerHTML = groupsFor(P.meter).map(g =>
     `<label class="pr-chk"><input type="checkbox" value="${g.id}"${P.custom.includes(g.id) ? ' checked' : ''}> <span>${T(g.name)}</span> <small>${g.level}</small></label>`).join('');
   box.hidden = P.level !== 0;
+  fillMix();
+}
+
+// Rhythm mix: one slider per kind of rhythm in play (Rare … Lots); Normal is the level's own balance.
+function fillMix() {
+  const groups = groupsFor(P.meter).filter(g => P.level === 0 ? P.custom.includes(g.id) : g.level <= P.level);
+  const k = g => P.mix[g.id] ?? 2;
+  $('#prMix').innerHTML = groups.map(g => `<label class="pr-mix-row"><span>${T(g.name)}</span>
+    <input type="range" min="0" max="${MIX.length - 1}" step="1" value="${k(g)}" data-g="${g.id}" aria-label="${T(g.name)}">
+    <span class="val">${T(MIX_NAMES[k(g)])}</span></label>`).join('');
+  const changedN = groups.filter(g => k(g) !== 2).length;
+  $('#prMixHint').textContent = changedN ? plural(changedN, '{n} changed', '{n} changed') : '';
 }
 
 function changed(fn) { return e => { if (run) stopPractice(); stopListen(); fn(e); save(); newRhythm(); }; }
@@ -282,10 +299,21 @@ export function bindPractice() {
     P.mode = b.dataset.v; save(); $$('#prMode button').forEach(x => x.classList.toggle('on', x === b));
     $('#prModeNote').textContent = P.mode === 'hold' ? T('Hold each note for its written length (keys, mouse or touch).') : '';
   });
-  $('#prLevel').addEventListener('change', changed(() => { P.level = +$('#prLevel').value; $('#prCustom').hidden = P.level !== 0; }));
+  $('#prLevel').addEventListener('change', changed(() => { P.level = +$('#prLevel').value; $('#prCustom').hidden = P.level !== 0; fillMix(); }));
+  $('#prMix').addEventListener('input', e => {
+    const r = e.target.closest('input[data-g]'); if (!r) return;
+    r.parentElement.querySelector('.val').textContent = T(MIX_NAMES[+r.value]);
+  });
+  $('#prMix').addEventListener('change', changed(e => {
+    const r = e.target.closest('input[data-g]'); if (!r) return;
+    if (+r.value === 2) delete P.mix[r.dataset.g]; else P.mix[r.dataset.g] = +r.value;
+    fillMix();
+  }));
+  $('#prMixReset').addEventListener('click', changed(() => { P.mix = {}; fillMix(); }));
   $('#prCustom').addEventListener('change', changed(() => {
     P.custom = [...$$('#prCustom input:checked')].map(x => x.value);
     if (!P.custom.length) { P.custom = ['basic']; $('#prCustom input[value=basic]').checked = true; toast(T('choose at least one kind of rhythm')); }
+    fillMix();
   }));
   $('#prMeter').addEventListener('change', changed(() => { P.meter = $('#prMeter').value; fillLevels(); buildDots(P.meter, ['#prDots']); }));
   $('#prBars').addEventListener('change', changed(() => { P.bars = +$('#prBars').value; }));
@@ -302,10 +330,39 @@ export function bindPractice() {
   $('#prAgainNew').addEventListener('click', () => { newRhythm(); start(); });
   $('#prReplay').addEventListener('click', () => start());
   // the stage is a tap pad too
+  // The stage: during a run every press is a tap. While stopped, dragging scrolls the line and a click (a press
+  // that did not move) starts a run.
   const st = $('#prStage');
-  st.addEventListener('pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); try { st.setPointerCapture(e.pointerId); } catch {} practiceDown(e.timeStamp, { key: 'p' + e.pointerId, src: 'key' }); });
-  st.addEventListener('pointerup', e => practiceUp(e.timeStamp, 'p' + e.pointerId));
-  st.addEventListener('pointercancel', e => practiceUp(e.timeStamp, 'p' + e.pointerId));
+  let drag = null;
+  st.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault(); try { st.setPointerCapture(e.pointerId); } catch {}
+    if (busy()) { drag = null; if (run) practiceDown(e.timeStamp, { key: 'p' + e.pointerId, src: 'key' }); return; }
+    drag = { id: e.pointerId, x: e.clientX, moved: false };
+  });
+  st.addEventListener('pointermove', e => {
+    if (!drag || drag.id !== e.pointerId) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved && Math.abs(dx) < 6) return;
+    drag.moved = true; drag.x = e.clientX; st.classList.add('dragging');
+    scrollLine(-dx);
+  });
+  const up = (e, cancel) => {
+    if (drag && drag.id === e.pointerId) {
+      const click = !drag.moved && !cancel; drag = null; st.classList.remove('dragging');
+      if (click) practiceDown(e.timeStamp, { key: 'p' + e.pointerId, src: 'key' });
+      return;
+    }
+    practiceUp(e.timeStamp, 'p' + e.pointerId);
+  };
+  st.addEventListener('pointerup', e => up(e, false));
+  st.addEventListener('pointercancel', e => up(e, true));
+  st.addEventListener('wheel', e => {
+    if (busy() || !view) return;
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.shiftKey ? e.deltaY : 0;
+    if (!d) return;  // plain vertical wheel still scrolls the page
+    e.preventDefault(); scrollLine(d);
+  }, { passive: false });
   st.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && run) { e.preventDefault(); stopPractice(T('Stopped. Press space or Start to try again.')); }

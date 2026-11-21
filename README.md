@@ -21,7 +21,8 @@ The microphone and Web MIDI need a secure context; `localhost`/`127.0.0.1` count
 ```
 index.html            markup only (from the saved page, with extension junk and pre-rendered output removed)
 styles/               site.css (shared chrome) · fonts.css · app.css (was the inline <style>) · theme.css · practice.css
-vendor/               abcjs (notation engraver, sets window.ABCJS)
+vendor/               abcjs (notation engraver, sets window.ABCJS); patched so every tuplet gets a bracket
+                      (search `e.hasBeam=!1&&` to find it; redo it when updating abcjs)
 original/             the zip as received: kept for reference and used by the golden tests
 src/
   main.js             wiring + boot, in the original order

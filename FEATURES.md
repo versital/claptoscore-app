@@ -115,6 +115,10 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+| **Rhythm mix** (v0.4.1, Practice): one slider per kind of rhythm in the level (Rare · Less · Normal · More · Lots = ×0.1 … ×5), so e.g. septuplets in level 8 can be made rare without removing them; remembered; Reset to normal | `core/practice.js` `MIX`, `poolFor({ mix })` | ✅ test (Rare: < ⅓ as many 7-lets, still present) · browser |
+| Practice line scrolls by hand while stopped (drag, sideways wheel/trackpad, Shift+wheel); a click that does not move still starts a run, during a run every press is a tap | `features/practice.js` `scrollLine` | ✅ browser |
+| Every tuplet gets a bracket, also when one beam covers exactly its notes (abcjs left those with just the number, so 5- and 7-lets looked different from triplets). One-line patch in `vendor/abcjs-basic-min.js` (`e.hasBeam=!1&&…` in the triplet layout) | `vendor/abcjs-basic-min.js` | ✅ browser |
+| Setting **Jump to the notation when stopped** (Rhythm options, on by default, remembered): off keeps the page where it is after a take | `features/recorder.js`, `features/recordOptions.js` | ✅ browser |
 | **Custom meters** (v0.4.0): "Custom…" in both meter menus takes any n/2, n/4 or n/8 (n up to 32); added meters are remembered in both menus. n/4 and n/2 count quarter and half notes, n/8 with n divisible by 3 (3/8, 15/8) counts dotted quarters like 6/8, other n/8 (5/8, 7/8, 11/8) count eighths. Detection, notation, counting, MusicXML/MIDI tempo, share links (rhythm-code v2, meter index 15 + n, d) and practice rhythms all follow | `core/meters.js` `parseMeter`, `features/meterPicker.js` | ✅ `tests/meters.test.js` · browser |
 | **No tempo limits** (v0.4.0): 1–9999 BPM (was 30–300) in both tabs, `?bpm=` and share links (tempos outside 20–400 use rhythm-code v2); 4-digit tempos get a smaller display font | `features/tempo.js`, `core/rhythmCode.js` | ✅ tests · browser |
 | Fix (v0.4.0): the Practice beat dots followed the Notate meter (e.g. 2 dots for a 9/8 rhythm when Notate was on 6/8), and opening Practice rebuilt the Notate dots with the Practice meter. Each row now follows its own meter | `ui/beatDots.js` | ✅ browser |
@@ -192,3 +196,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.3.2 | 2026-11-21 | Metronome volume slider (Tempo panel and Practice tab). |
 | 0.3.3 | 2026-11-21 | Practice: Listen scrolls the music along with the sound and lights each note as it plays. |
 | 0.4.0 | 2026-11-21 | Custom meters (n/2, n/4, n/8), no tempo limits (1–9999 BPM), practice beat dots follow the practice meter. `tests/meters.test.js`. |
+| 0.4.1 | 2026-11-21 | Rhythm mix sliders in Practice, scroll the practice line while stopped, brackets on every tuplet (abcjs patch), setting to not jump to the notation after a take. |

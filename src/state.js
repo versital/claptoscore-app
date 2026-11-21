@@ -4,7 +4,7 @@ import { DEFAULT_OPT } from './core/analyze.js';
 // S: user settings + the current take (rec) and its analysis (A).
 export const S = {
   bpm: 96, meter: '4/4', latency: 0, micLatency: 0, step: 2, subdiv: false,
-  countIn: 1, clickOn: true, autoStop: true, twoVoices: false, free: false, tempoHint: false,
+  countIn: 1, clickOn: true, autoStop: true, jumpToResult: true, twoVoices: false, free: false, tempoHint: false,
   opt: { ...DEFAULT_OPT },
   rec: null, A: null,
 };

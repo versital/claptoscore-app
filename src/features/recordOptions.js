@@ -35,6 +35,11 @@ export function bindRecordOptions() {
   $('#countIn').addEventListener('change', e => { S.countIn = +e.target.value; if (rec.state === 'idle') padIdle(); });
   $('#clickOn').addEventListener('change', e => { S.clickOn = e.target.checked; });
   $('#autoStop').addEventListener('change', e => { S.autoStop = e.target.checked; });
+  // after a take the page scrolls to the notation; this setting keeps the view where it is
+  const j = store.get('jumpToResult');
+  if (typeof j === 'boolean') S.jumpToResult = j;
+  $('#jumpToResult').checked = S.jumpToResult;
+  $('#jumpToResult').addEventListener('change', e => { S.jumpToResult = e.target.checked; store.set('jumpToResult', S.jumpToResult); });
   $('#tempoHint').addEventListener('change', e => { S.tempoHint = e.target.checked; });
   onSeg('#voices', v => setVoices(v === '2'));
   onSeg('#timing', v => { if (rec.state === 'idle') setTiming(v === 'free'); });

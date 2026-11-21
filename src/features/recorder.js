@@ -131,7 +131,7 @@ export function stopRecording() {
   store.set('rec', S.rec);
   buildFinest(); syncControls();
   render();
-  $('.result').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  if (S.jumpToResult) $('.result').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
 }
 
 export const toggleRecording = () => rec.state === 'idle' ? startRecording() : stopRecording();

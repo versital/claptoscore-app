@@ -74,3 +74,21 @@ test('note times follow the tempo', () => {
   const c = generate({ meter: '6/8', bpm: 60, level: 2, seed: 1 });
   assert.ok(noteTimes(c).every(x => Math.abs(x.t / (1000 / 3) - Math.round(x.t / (1000 / 3))) < 1e-6));
 });
+
+test('rhythm mix turns a kind of rhythm down without removing it', () => {
+  const count7 = mix => {
+    let n = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const r = generate({ meter: '4/4', level: 8, bars: 8, seed, mix });
+      const tpb = 12 * r.u;
+      const beats = new Map();
+      for (const x of r.voices[0]) { const b = Math.floor(x.start / tpb); beats.set(b, (beats.get(b) || 0) + 1); }
+      n += [...beats.values()].filter(c => c === 7).length;
+    }
+    return n;
+  };
+  const normal = count7(null), rare = count7({ septuplets: 0.1 }), lots = count7({ septuplets: 5 });
+  assert.ok(rare > 0, 'still there');
+  assert.ok(rare < normal / 3, `rare ${rare} vs normal ${normal}`);
+  assert.ok(lots > normal, `lots ${lots} vs normal ${normal}`);
+});

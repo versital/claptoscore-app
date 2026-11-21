@@ -24,14 +24,14 @@ body:not([data-tab="practice"]) .practice { display: none; }
 
 /* the stage: paper with the music on one line, scrolled under a fixed playhead */
 .pr-stage {
-  position: relative; overflow: hidden; min-height: 200px; padding: 40px 0 64px;
+  position: relative; overflow: hidden; min-height: 200px; padding: 40px 0 74px;
   background: var(--paper); color: var(--paper-ink); border-radius: 6px; box-shadow: var(--paper-frame);
-  cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  cursor: pointer; touch-action: pan-y; user-select: none; -webkit-user-select: none;
 }
 .pr-roll { width: max-content; will-change: transform; }
 .pr-roll svg { display: block; }
 .pr-title { position: absolute; top: 10px; left: 0; right: 0; text-align: center; font: italic 600 17px/1.2 Georgia, "Times New Roman", serif; color: var(--paper-ink); }
-.pr-head { position: absolute; top: 34px; bottom: 56px; left: 0; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--c-yellow, #F5B800); pointer-events: none; }
+.pr-head { position: absolute; top: 34px; bottom: 66px; left: 0; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--c-yellow, #F5B800); pointer-events: none; }
 #prDots { position: absolute; left: 0; right: 0; bottom: 12px; }
 .pr-stage:has(.pr-msg:not([hidden])) #prDots { visibility: hidden; }
 .pr-msg {
@@ -76,3 +76,10 @@ body:not([data-tab="practice"]) .practice { display: none; }
 /* custom meter field next to a meter menu */
 .meter-custom { width: 4.2em; font: 600 13px/1 var(--mono); padding: 6px 6px; text-align: center; margin-left: 6px; }
 .bpm input.four { font-size: 46px; width: calc(2.75em + 12px); }
+
+/* rhythm mix */
+.pr-mix { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 22px; margin: 8px 0 10px; }
+.pr-mix-row { display: grid; grid-template-columns: 1fr auto 4.6em; align-items: center; gap: 8px; font-size: 13px; }
+.pr-mix-row input[type="range"] { width: 100px; }
+.pr-mix-row .val { font: 600 10.5px/1 var(--mono); color: var(--ink-3); text-transform: uppercase; }
+.pr-stage.dragging { cursor: grabbing; }

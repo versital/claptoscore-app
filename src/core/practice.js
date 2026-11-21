@@ -60,7 +60,9 @@ export function rng(seed) {
 }
 
 // The weighted pattern pool for a level (1..8) or a custom list of group ids.
-export function poolFor(meter, { level = 2, custom = null } = {}) {
+// mix: { groupId: factor } turns a kind of rhythm up or down without removing it (see MIX).
+export const MIX = [0.1, 0.35, 1, 2.5, 5], MIX_NAMES = ['Rare', 'Less', 'Normal', 'More', 'Lots'];
+export function poolFor(meter, { level = 2, custom = null, mix = null } = {}) {
   const groups = groupsFor(meter);
   const chosen = custom ? groups.filter(g => custom.includes(g.id)) : groups.filter(g => g.level <= level);
   const pool = [];
@@ -68,15 +70,16 @@ export function poolFor(meter, { level = 2, custom = null } = {}) {
     // a level leans on what it introduces: its new groups together weigh as much as all earlier ones together
     const fresh = chosen.filter(x => x.level === level).length, older = chosen.length - fresh;
     const w = custom ? 1 : g.level === level ? Math.max(1, older / fresh) : 1;
-    for (const p of g.p) pool.push({ p, w: w / g.p.length, g: g.id });
+    const f = mix && mix[g.id] > 0 ? mix[g.id] : 1;
+    for (const p of g.p) pool.push({ p, w: w * f / g.p.length, g: g.id });
   }
   return pool;
 }
 
 // A random rhythm: { meter, bpm, voices: [notes], u } with notes { start, end } in ticks (M.tpb * u per beat).
-export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom = null, seed = 1 } = {}) {
+export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom = null, mix = null, seed = 1 } = {}) {
   const M = METERS[meter], rand = rng(seed);
-  let pool = poolFor(meter, { level, custom });
+  let pool = poolFor(meter, { level, custom, mix });
   // every bar must be fillable beat by beat: keep a one-beat pattern with at least one note
   if (!pool.some(x => x.p.b === 1 && x.p.n.length)) pool = pool.concat(poolFor(meter, { custom: ['basic'] }).filter(x => x.p.b === 1 && x.p.n.length));
   // Patterns are written per quarter note (simple meters) or dotted quarter (compound), whatever the meter's beat:
