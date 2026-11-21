@@ -46,6 +46,7 @@ body:not([data-tab="practice"]) .practice { display: none; }
 .pr-good, .pr-good * { fill: var(--good) !important; stroke: var(--good); }
 .pr-ok, .pr-ok * { fill: var(--warn) !important; stroke: var(--warn); }
 .pr-miss, .pr-miss * { fill: var(--bad) !important; stroke: var(--bad); }
+.pr-play, .pr-play * { fill: var(--pulse) !important; stroke: var(--pulse); }  /* sounding while you listen */
 
 /* results */
 .pr-results { display: flex; flex-direction: column; gap: 14px; align-items: stretch; padding-top: 4px; }

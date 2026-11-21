@@ -116,6 +116,7 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
 | **Metronome volume** slider (0–150 %, remembered) in the Tempo panel and the Practice tab, kept in sync. All clicks go through their own gain node, so the rhythm sounds keep their level | `features/clickVolume.js`, `audio/context.js` `clickBus` | ✅ browser |
+| Listen (v0.3.3) scrolls the line with the sound: count-in dots, the playhead follows the audio clock and each note turns blue as it sounds; Esc stops it | `features/practice.js` `listen` | ✅ browser |
 | More tap keys (v0.3.1): Space / J / K for the high voice, F / D for the low voice (with one voice F and D tap too), so fast passages can alternate fingers | `input/keyboard.js` | ✅ browser |
 
 ### 5 · Practice tab (v0.3.0)
@@ -186,3 +187,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.3.0 | 2026-11-21 | Practice tab: random rhythms by level (1–8 + custom), tempo, meter, length, count-in, scrolling line with a fixed playhead, live note colours, accuracy %; Tap and Hold modes. `tests/practice.test.js`. |
 | 0.3.1 | 2026-11-21 | More tap keys: J / K / Space high, F / D low (both tap with one voice); in Practice every letter and digit key taps. Fix: practice runs ended at once (the hidden-tab end timer started before the start time was known). |
 | 0.3.2 | 2026-11-21 | Metronome volume slider (Tempo panel and Practice tab). |
+| 0.3.3 | 2026-11-21 | Practice: Listen scrolls the music along with the sound and lights each note as it plays. |

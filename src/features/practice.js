@@ -7,7 +7,7 @@ import { toAbc, exercise } from '../core/rhythmCode.js';
 import { generate, scoreRun, noteTimes, windows, groupsFor, levelName, MAX_LEVEL, GOOD_MS } from '../core/practice.js';
 import { T, plural } from '../services/i18n.js';
 import { store } from '../services/store.js';
-import { audio, ctx } from '../audio/context.js';
+import { audio, ctx, audioToPerf } from '../audio/context.js';
 import { click, wood } from '../audio/sounds.js';
 import { metro, metroStart, metroStop } from '../audio/metronome.js';
 import { stopPlay } from '../audio/playback.js';
@@ -21,7 +21,7 @@ const P = { mode: 'tap', level: 2, custom: ['basic', 'eighths'], bpm: 100, meter
 let R = null;      // the current rhythm (rhythm-code object), its seed and note times
 let view = null;   // the drawn line: { pts: [[ms, x]], heads: [[el]] per note, width }
 let run = null;    // a run in progress: { start, notes, win, taps, done: Set, raf }
-let listenBag = [], listenTimer = 0;
+let listenBag = [], listenTimer = 0, listenRaf = 0;
 
 export const practiceTab = () => document.body.dataset.tab === 'practice';
 export const practiceRunning = () => !!run;
@@ -205,10 +205,17 @@ function setStartButton(on) {
   b.innerHTML = on ? `<span class="ic">■</span> ${T('Stop')}` : `<span class="ic">●</span> ${T('Start')}`;
 }
 
-// ---------- listen: the rhythm on a woodblock over the click ----------
+// ---------- listen: the rhythm on a woodblock over the click, with the line scrolling along ----------
+let listenMsg = false;
 function stopListen() {
+  const was = listenBag.length > 0;
   listenBag.forEach(o => { try { o.stop(); } catch {} }); listenBag = []; clearTimeout(listenTimer);
+  cancelAnimationFrame(listenRaf); listenRaf = 0;
   $('#prListen').innerHTML = `<span class="ic">▶</span> ${T('Listen')}`;
+  if (!was) return;
+  $$('#prScore .pr-play').forEach(e => e.classList.remove('pr-play'));
+  $$('#prDots .dot.on').forEach(d => d.classList.remove('on'));
+  if (!run) { place(-1); if (listenMsg) $('#prMsg').hidden = false; }
 }
 function listen() {
   if (listenBag.length) { stopListen(); return; }
@@ -221,6 +228,22 @@ function listen() {
   for (const n of R.times) wood(s0 + n.t / 1000, listenBag);
   $('#prListen').innerHTML = `<span class="ic">■</span> ${T('Listen')}`;
   listenTimer = setTimeout(stopListen, (beats * beatSec + 0.5) * 1000);
+  // the playhead and the scrolling follow the sound (audio clock mapped to the page clock), each note lights up as
+  // it sounds, and the beat dots count in
+  clearMarks();
+  listenMsg = !$('#prMsg').hidden; $('#prMsg').hidden = true;
+  const startPerf = audioToPerf(s0), beatMs = beatSec * 1000, dots = $('#prDots').children, endMs = P.bars * M.beats * beatMs;
+  let next = 0;
+  const frame = () => {
+    const t = performance.now() - startPerf;
+    place(t);
+    while (next < R.times.length && t >= R.times[next].t) { view?.heads[next]?.forEach(e => e.classList.add('pr-play')); next++; }
+    const b = Math.floor((t + M.beats * beatMs) / beatMs);
+    [...dots].forEach((d, i) => d.classList.toggle('on', b >= 0 && i === b % M.beats));
+    if (t > endMs + 300) return;  // the timer stops the sound and tidies up
+    listenRaf = requestAnimationFrame(frame);
+  };
+  listenRaf = requestAnimationFrame(frame);
 }
 
 // ---------- controls ----------
@@ -235,7 +258,7 @@ function fillLevels() {
   box.hidden = P.level !== 0;
 }
 
-function changed(fn) { return e => { if (run) stopPractice(); fn(e); save(); newRhythm(); }; }
+function changed(fn) { return e => { if (run) stopPractice(); stopListen(); fn(e); save(); newRhythm(); }; }
 
 export function showPracticeTab(on) {
   document.body.dataset.tab = on ? 'practice' : 'notate';
@@ -271,7 +294,7 @@ export function bindPractice() {
   $('#prBpmUp').addEventListener('click', changed(() => setBpm(P.bpm + 4)));
   $('#prClick').addEventListener('change', () => { P.click = $('#prClick').checked; save(); });
   $('#prStart').addEventListener('click', () => run ? stopPractice(T('Stopped. Press space or Start to try again.')) : start());
-  $('#prNew').addEventListener('click', () => { stopPractice(); newRhythm(); $('#prResults').hidden = true; });
+  $('#prNew').addEventListener('click', () => { stopPractice(); stopListen(); newRhythm(); $('#prResults').hidden = true; });
   $('#prListen').addEventListener('click', listen);
   $('#prAgainNew').addEventListener('click', () => { newRhythm(); start(); });
   $('#prReplay').addEventListener('click', () => start());
@@ -281,7 +304,10 @@ export function bindPractice() {
   st.addEventListener('pointerup', e => practiceUp(e.timeStamp, 'p' + e.pointerId));
   st.addEventListener('pointercancel', e => practiceUp(e.timeStamp, 'p' + e.pointerId));
   st.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && run) { e.preventDefault(); stopPractice(T('Stopped. Press space or Start to try again.')); } });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && run) { e.preventDefault(); stopPractice(T('Stopped. Press space or Start to try again.')); }
+    else if (e.key === 'Escape' && listenBag.length && practiceTab()) { e.preventDefault(); stopListen(); }
+  });
   let rT = 0; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (practiceTab() && !run) draw(); }, 150); });
   // the tabs: #practice, anything else is the notation tool
   const fromHash = () => showPracticeTab(location.hash === '#practice');
