@@ -115,6 +115,7 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+| **Metronome volume** slider (0–150 %, remembered) in the Tempo panel and the Practice tab, kept in sync. All clicks go through their own gain node, so the rhythm sounds keep their level | `features/clickVolume.js`, `audio/context.js` `clickBus` | ✅ browser |
 | More tap keys (v0.3.1): Space / J / K for the high voice, F / D for the low voice (with one voice F and D tap too), so fast passages can alternate fingers | `input/keyboard.js` | ✅ browser |
 
 ### 5 · Practice tab (v0.3.0)
@@ -184,3 +185,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.2.2 | 2026-11-19 | After a second adversarial round: drawn 10–13-lets keep exact bar lengths (split brackets, no voice drift); tuplet-first tempo fit as a second opinion (better on tuplet-heavy takes); windowed local fits (dense takes 3–4× faster); share note shows the real bar count. |
 | 0.3.0 | 2026-11-21 | Practice tab: random rhythms by level (1–8 + custom), tempo, meter, length, count-in, scrolling line with a fixed playhead, live note colours, accuracy %; Tap and Hold modes. `tests/practice.test.js`. |
 | 0.3.1 | 2026-11-21 | More tap keys: J / K / Space high, F / D low (both tap with one voice); in Practice every letter and digit key taps. Fix: practice runs ended at once (the hidden-tab end timer started before the start time was known). |
+| 0.3.2 | 2026-11-21 | Metronome volume slider (Tempo panel and Practice tab). |

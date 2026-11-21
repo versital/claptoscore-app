@@ -65,3 +65,9 @@ body:not([data-tab="practice"]) .practice { display: none; }
 #prFull { overflow-x: auto; }
 .pr-results .legend { justify-content: center; }
 @media (max-width: 520px) { .pr-msg { font-size: 11.5px; padding: 4px 8px; } .pr-ring { width: 92px; height: 92px; } }
+
+/* metronome volume (Tempo panel and Practice tab) */
+.vol { display: inline-flex; align-items: center; gap: 6px; }
+.vol input[type="range"] { width: 110px; }
+.vol .val { font: 600 11px/1 var(--mono); min-width: 3.6em; color: var(--ink-3); }
+.vol-row { justify-content: flex-end; }

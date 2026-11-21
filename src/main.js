@@ -31,6 +31,7 @@ import { bindExportMenu } from './features/exportMenu.js';
 import { bindUpsell } from './features/proGate.js';
 import { bindTakes } from './features/takes.js';
 import { bindPractice } from './features/practice.js';
+import { bindClickVolume } from './features/clickVolume.js';
 
 // The original scripts were globals other site pages relied on; keep them reachable.
 Object.assign(window, { Pro, MidiIn, RhythmCode, noteGroup });
@@ -91,6 +92,7 @@ $$('details.more').forEach(d => {
 });
 startBeatDisplay();
 bindPractice();
+bindClickVolume();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
 render();
 
