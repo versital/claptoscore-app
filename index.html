@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="alternate" hreflang="en" href="https://claptoscore.com/">
+<link rel="alternate" hreflang="nl" href="https://claptoscore.com/nl/">
+<link rel="alternate" hreflang="es" href="https://claptoscore.com/es/">
+<link rel="alternate" hreflang="fr" href="https://claptoscore.com/fr/">
+<link rel="alternate" hreflang="pt" href="https://claptoscore.com/pt/">
+<link rel="alternate" hreflang="zh-Hans" href="https://claptoscore.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://claptoscore.com/">
+<meta property="og:locale" content="en_US">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tap a Rhythm, Get Sheet Music · Claptoscore</title>
+<meta name="description" content="Tap or clap a rhythm on your space bar, mouse or microphone and Claptoscore writes it as clean rhythm notation. Free, in your browser, with timing correction, triplets, 6/8 and two-voice drum parts.">
+<link rel="canonical" href="https://claptoscore.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Claptoscore">
+<meta property="og:title" content="Tap a rhythm, get sheet music">
+<meta property="og:description" content="Tap or clap any rhythm and see it written out as notation, cleaned up for timing mistakes.">
+<meta property="og:url" content="https://claptoscore.com/">
+<meta property="og:image" content="https://claptoscore.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://claptoscore.com/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="https://claptoscore.com/apple-touch-icon.png">
+<meta name="theme-color" content="#E6E6E2">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Claptoscore", "url": "https://claptoscore.com/", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any (web browser)", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Tap or clap a rhythm and get clean rhythm notation, with timing correction."}</script>
+<!-- Styles, in the original cascade order: shared chrome, fonts, app layout, hardware theme -->
+<link rel="stylesheet" href="./styles/site.css">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/app.css">
+<link rel="stylesheet" href="./styles/theme.css">
+<!-- Notation engraver (classic script, sets window.ABCJS) -->
+<script src="./vendor/abcjs-basic-min.js"></script>
+<!-- Everything else is ES modules; see src/main.js -->
+<script type="module" src="./src/main.js"></script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1 translate="no">Clapto<span>score</span></h1>
+      <p>Rhythm notation</p>
+      <nav class="sitenav" aria-label="Site">
+        <a href="https://claptoscore.com/" aria-current="page">Notate</a><a href="https://claptoscore.com/lessons/">Lessons</a><a href="https://claptoscore.com/rhythms/">Rhythms</a><a href="https://claptoscore.com/metronome/">Metronome</a><a href="https://claptoscore.com/guide/rhythm-notation/">Guide</a><a href="https://claptoscore.com/pro/">Pro</a>
+      </nav>
+    </div>
+    <button class="help-key inline hdr" data-help="helpKeys" aria-label="Keys" title="Keys">?</button>
+  </header>
+
+  <section class="steps">
+    <article class="panel" id="p1">
+      <div class="panel-head"><span class="step-no">1</span><h2>Tempo</h2></div>
+      <div class="tempo-row">
+        <button class="round slower" id="bpmDown" aria-label="Slower">−</button>
+        <div class="bpm"><input id="bpm" type="text" inputmode="numeric" maxlength="3" autocomplete="off" value="96" aria-label="Tempo in BPM"><span>BPM</span></div>
+        <button class="round faster" id="bpmUp" aria-label="Faster">+</button>
+      </div>
+      <div class="dots" id="dots1"><span class="dot down"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="row">
+        <button class="btn" id="tempoTap" title="Tap tempo"><i class="i i-tap"></i> Tap</button>
+        <label>
+          <select id="meter" aria-label="Meter" title="Meter">
+            <option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option>
+            <option>6/8</option><option>9/8</option><option>12/8</option>
+          </select>
+        </label>
+        <span class="spacer"></span>
+        <label class="tog" id="subLbl" title="Subdivide"><input type="checkbox" id="subdiv" aria-label="Subdivide"><span class="sub-ic"><svg class="ng" viewBox="0 0 15.5 29.5" width="11.6" height="22.1" fill="currentColor" aria-hidden="true"><ellipse cx="3.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 3.4 26)"></ellipse><rect x="5.4" y="3" width="1.25" height="22.4"></rect><ellipse cx="11.9" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 11.9 26)"></ellipse><rect x="13.9" y="3" width="1.25" height="22.4"></rect><rect x="5.4" y="3" width="9.75" height="2.3"></rect></svg></span></label>
+        <button class="btn icon" id="metroBtn" aria-label="Metronome" title="Metronome" aria-pressed="false"><span class="ic">▶</span><i class="i i-metronome"></i></button>
+      </div>
+      <details class="more" id="more1">
+        <summary><i class="i i-sliders"></i><span class="vh">Options</span> <span class="more-hint">latency <b id="latVal"><i class="i i-keyboard"></i>0 ms · <i class="i i-mic"></i>0 ms</b></span></summary>
+        <div class="more-body">
+          <div class="calib-body">
+            <div class="calib-grid">
+              <label title="Keyboard, clicks &amp; MIDI"><span class="ic-set"><i class="i i-keyboard"></i><i class="i i-pointer"></i><i class="i i-midi"></i></span> <input type="number" class="sm" id="latency" step="1" value="0" aria-label="Keyboard, clicks &amp; MIDI"> ms</label>
+              <label title="Microphone"><span class="ic-set"><i class="i i-mic"></i></span> <input type="number" class="sm" id="micLatency" step="1" value="0" aria-label="Microphone"> ms</label>
+              <div class="calib-act"><button class="btn" id="calibBtn">Calibrate</button><button class="help-key inline" data-help="helpCalib" aria-label="Help" title="Help">?</button></div>
+            </div>
+            <span id="calibInfo" class="pad-sub"></span>
+          </div>
+        </div>
+      </details>
+    </article>
+
+    <article class="panel active" id="p2">
+      <div class="panel-head"><span class="step-no">2</span><h2>Rhythm</h2><span class="hint-r" id="p2hint">96 BPM · 4/4</span></div>
+      <div class="pad pad-lg" id="rhythmPad" role="button" aria-label="Rhythm tap pad">
+        <span class="pad-voice l" hidden>F · low</span><span class="pad-voice r" hidden="">J / Space · high</span>
+        <div class="pad-main" id="padMain">Click or space</div>
+        <div class="pad-sub" id="padSub"></div>
+      </div>
+      <div class="dots" id="dots2"><span class="dot down"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="row">
+        <button class="btn primary" id="recBtn" aria-label="Rec" title="Rec"><span class="ic">●</span></button>
+        <label class="tog" title="Microphone"><input type="checkbox" id="micOn" aria-label="Microphone"><i class="i i-mic"></i></label>
+        <span class="meter" id="micMeter" title="Input level"><i id="micLevel"></i></span>
+        <label class="tog" title="MIDI"><input type="checkbox" id="midiOn" aria-label="MIDI"><i class="i i-midi"></i></label>
+      </div>
+      <div class="live" aria-live="off">
+        <div class="live-head"><span class="live-tag">Live</span><span id="liveInfo">last take · clean-up below</span></div>
+        <div id="liveScore"></div>
+      </div>
+      <span class="ib-note" id="micStatus"></span>
+      <span class="ib-note" id="midiStatus"></span>
+      <details class="more" id="more2">
+        <summary><i class="i i-sliders"></i><span class="vh">Options</span> <span class="more-hint">free tempo, two voices, count-in</span><button class="help-key inline" data-help="helpRec" aria-label="Help" title="Help">?</button></summary>
+        <div class="more-body">
+          <div class="opt">
+            <span class="opt-label">Timing</span>
+            <div class="seg" id="timing"><button data-v="click" class="on">With metronome</button><button data-v="free">Free tempo</button></div>
+          </div>
+          <div class="opt">
+            <span class="opt-label">Voices</span>
+            <div class="seg" id="voices"><button data-v="1" class="on">1</button><button data-v="2">2</button></div>
+          </div>
+          <div class="opt click-only">
+            <span class="opt-label">Count-in</span>
+            <select id="countIn" aria-label="Count-in"><option value="1" selected>1 bar</option><option value="2">2 bars</option></select>
+          </div>
+          <div class="row">
+            <label class="tog click-only" title="Click while tapping"><input type="checkbox" id="clickOn" checked aria-label="Click while tapping"><i class="i i-metronome"></i></label>
+            <label class="tog free-only" hidden title="Tempo hint"><input type="checkbox" id="tempoHint" aria-label="Tempo hint"> ≈ <span id="hintBpm">96</span> BPM</label>
+            <label class="tog"><input type="checkbox" id="autoStop" checked> <span id="autoStopLbl">Stop after 2 silent bars</span></label>
+            <label title="Mic sensitivity"><i class="i i-mic"></i> <input type="range" id="micSens" min="1" max="10" step="1" value="5" aria-label="Mic sensitivity"></label>
+          </div>
+        </div>
+      </details>
+    </article>
+  </section>
+
+  <dialog class="keys-help" id="helpKeys" aria-label="Keys">
+    <table>
+      <tbody><tr><td><kbd class="space" aria-label="Space"></kbd> <kbd>J</kbd></td><td>Tap</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Low voice, with two voices</td></tr>
+      <tr><td><kbd>T</kbd></td><td>Tap tempo</td></tr>
+      <tr><td><kbd>Enter</kbd> <kbd>Esc</kbd></td><td>Stop</td></tr>
+      <tr><td><i class="i i-mic"></i> <i class="i i-midi"></i></td><td>Claps and MIDI notes count as taps</td></tr>
+    </tbody></table>
+    <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
+  </dialog>
+  <dialog class="keys-help" id="helpCalib" aria-label="Calibrate">
+    <p>Every input adds its own delay: keyboards, trackpads, microphones, Bluetooth audio. Calibrate each one you use. You hear 4 clicks, then tap or clap along with the next 12.</p>
+    <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
+  </dialog>
+  <dialog class="keys-help" id="helpRec" aria-label="Options">
+    <table>
+      <tbody><tr><td>With metronome</td><td>Count-in, then tap along with the click.</td></tr>
+      <tr><td>Free tempo</td><td>Tap without a click; the tempo and barlines are worked out afterwards, using your meter.</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Two voices: F or the left half of the pad plays the low voice, and so do MIDI notes below middle C.</td></tr>
+    </tbody></table>
+    <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
+  </dialog>
+  <dialog class="keys-help wide" id="helpFine" aria-label="Fine-tune">
+    <p>Changes apply instantly to the last take.</p>
+    <table>
+      <tbody><tr><td>Grid</td><td>Taps are written in this note value or longer (down to 32nds). The triplet key allows triplets.</td></tr>
+      <tr><td>Tuplets</td><td>The <i>n</i> key also finds quintuplets, sextuplets, septuplets and 9- to 13-lets in a beat, quarter- and half-note triplets, and duplets and quadruplets in 6/8, 9/8 and 12/8.</td></tr>
+      <tr><td>Simplicity</td><td>Higher prefers plainer rhythms when a tap sits between two readings.</td></tr>
+      <tr><td>Tempo correction</td><td>Steady fits one tempo and offset to your taps; Follow drift also tracks rushing and dragging.</td></tr>
+      <tr><td>Note lengths</td><td>As held reads key/press release, so gaps become rests.</td></tr>
+      <tr><td>Longest note</td><td>Longer gaps are written as rests. With two voices, No limit still stops at one beat.</td></tr>
+      <tr><td>Ignore double taps</td><td>Taps closer together than this count as one, per voice.</td></tr>
+      <tr><td>½× 2×</td><td>Fixes a tempo read at double or half speed.</td></tr>
+      <tr><td>◀ ▶</td><td>Move the barlines by a beat if the downbeat is in the wrong place.</td></tr>
+      <tr><td>Timing chart</td><td>Top row: your taps against the click · bottom row: where they were written · click a tap to ignore it</td></tr>
+    </tbody></table>
+    <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
+  </dialog>
+  <dialog class="keys-help" id="helpShare" aria-label="Share">
+    <p>Anyone with the link can listen, clap it back and get a score. Nothing is uploaded: the link holds the rhythm.</p>
+    <p>The notes stay hidden until they have tapped it once: rhythm dictation.</p>
+    <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
+  </dialog>
+
+  <section class="result">
+    <div class="result-head">
+      <span class="step-no">3</span><h2>Notation</h2><span class="tag user" id="srcTag" hidden></span>
+      <span class="spacer"></span>
+      <button class="btn icon" id="playQ" aria-label="Play score" title="Play score"><span class="ic">▶</span><i class="i i-notes"></i></button>
+      <button class="btn icon" id="playR" aria-label="Play taps" title="Play taps"><span class="ic">▶</span><i class="i i-tap"></i></button>
+      <button class="btn" id="shareBtn" aria-expanded="false" hidden><i class="i i-send"></i> Share</button>
+      <div class="export">
+        <button class="btn" id="exportBtn" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+        <div class="menu" id="exportMenu" hidden>
+          <button data-x="musicxml">MusicXML <span class="pro-tag">Pro</span><small>MuseScore, Sibelius, Dorico, Finale</small></button>
+          <button data-x="midi">MIDI <span class="pro-tag">Pro</span><small>drum track for your DAW</small></button>
+          <button data-x="print">Print / PDF <span class="pro-tag">Pro</span><small>clean printout of the notation</small></button>
+          <button data-x="abc">Copy ABC<small>free: paste into any ABC tool</small></button>
+        </div>
+      </div>
+    </div>
+    <div class="upsell" id="upsell" hidden>
+      <span id="upsellText">Export is part of Claptoscore Pro.</span>
+      <a class="btn primary" href="https://claptoscore.com/pro/">See Pro</a>
+      <button class="btn" id="upsellClose" aria-label="Close">✕</button>
+    </div>
+    <div class="share-panel" id="sharePanel" hidden>
+      <div class="row">
+        <input type="text" id="shareUrl" class="take-name" readonly aria-label="Link to this rhythm">
+        <button class="btn primary icon" id="shareCopy" aria-label="Copy" title="Copy"><i class="i i-copy"></i></button>
+        <button class="btn icon" id="shareSend" aria-label="Send" title="Send"><i class="i i-send"></i></button>
+        <a class="btn icon" id="shareOpen" href="https://claptoscore.com/#" target="_blank" rel="noopener" aria-label="Open" title="Open"><i class="i i-external"></i></a>
+        <button class="btn" id="shareClose" aria-label="Close">✕</button>
+      </div>
+      <div class="row">
+        <input type="text" id="shareTitle" class="take-name" maxlength="60" placeholder="Name (optional)" aria-label="Name of the rhythm">
+        <label><input type="checkbox" id="shareHide"> Hide the notes</label><button class="help-key inline" data-help="helpShare" aria-label="Help" title="Help">?</button>
+      </div>
+      <span class="ib-note" id="shareNote"></span>
+    </div>
+    <div class="opt count-opt" id="countRow" hidden>
+      <span class="opt-label">Count</span>
+      <div class="seg" id="countMode"><button data-v="off" class="on">Off</button><button data-v="count" title="Numbers">1 e &amp; a</button><button data-v="kodaly">Kodály</button></div>
+      <span class="ib-note" id="countNote"></span>
+    </div>
+    <div id="score"></div>
+    <div class="stats" id="stats"><span><b>25</b> notes</span><span><b>3</b> bars</span></div>
+    <div class="ad-slot" data-ad="result" hidden></div>
+
+    <details class="more" id="more4">
+      <summary>Takes <span class="pro-tag">Pro</span> <span class="more-hint" id="takesHint"></span></summary>
+      <div class="more-body">
+        <div class="row">
+          <input type="text" id="takeName" class="take-name" maxlength="80" placeholder="Name this take" aria-label="Take name">
+          <button class="btn primary" id="saveTake">Save take (Pro)</button>
+        </div>
+        <ul class="takes" id="takes"></ul>
+      </div>
+    </details>
+
+    <details class="more" id="more3" open>
+      <summary>Fine-tune <button class="help-key inline" data-help="helpFine" aria-label="Help" title="Help">?</button></summary>
+      <div class="more-body">
+        <div class="cleanup">
+          <div class="ctl">
+            <span>Grid</span>
+            <div class="inline"><div class="seg notes" id="finest"><button data-v="0" aria-label="Quarter notes" title="Quarter notes"><svg class="ng" viewBox="0 0 7.0 29.5" width="6.0" height="25.1" fill="currentColor" aria-hidden="true"><ellipse cx="3.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 3.4 26)"></ellipse><rect x="5.4" y="3" width="1.25" height="22.4"></rect></svg></button><button data-v="1" aria-label="Eighths" title="Eighths"><svg class="ng" viewBox="0 0 12.0 29.5" width="10.2" height="25.1" fill="currentColor" aria-hidden="true"><ellipse cx="3.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 3.4 26)"></ellipse><rect x="5.4" y="3" width="1.25" height="22.4"></rect><path d="M6.6 3c0 3.2 4.6 4.4 4.1 9.2c-.6-3-2.4-4.6-4.1-4.9z"></path></svg></button><button data-v="2" aria-label="Sixteenths" title="Sixteenths" class="on"><svg class="ng" viewBox="0 0 12.0 29.5" width="10.2" height="25.1" fill="currentColor" aria-hidden="true"><ellipse cx="3.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 3.4 26)"></ellipse><rect x="5.4" y="3" width="1.25" height="22.4"></rect><path d="M6.6 3c0 3.2 4.6 4.4 4.1 9.2c-.6-3-2.4-4.6-4.1-4.9z"></path><path d="M6.6 6.6c0 3.2 4.6 4.4 4.1 9.2c-.6-3-2.4-4.6-4.1-4.9z"></path></svg></button></div>
+            <label class="tog" id="tripLbl" title="Triplets"><input type="checkbox" id="triplets" checked aria-label="Triplets"><span class="tri-ic"><svg class="ng" viewBox="0 0 24.0 29.5" width="18.0" height="22.1" fill="currentColor" aria-hidden="true"><ellipse cx="3.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 3.4 26)"></ellipse><rect x="5.4" y="8" width="1.25" height="17.4"></rect><ellipse cx="11.9" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 11.9 26)"></ellipse><rect x="13.9" y="8" width="1.25" height="17.4"></rect><ellipse cx="20.4" cy="26" rx="3.4" ry="2.45" transform="rotate(-22 20.4 26)"></ellipse><rect x="22.4" y="8" width="1.25" height="17.4"></rect><rect x="5.4" y="8" width="18.25" height="2.3"></rect><text x="14.5" y="5.6" font-size="7.5" font-weight="700" font-style="italic" text-anchor="middle" font-family="Georgia, serif">3</text></svg></span></label><label class="tog" id="tupLbl" title="Tuplets (n-lets): 5-, 6-, 7-, 9- to 13-lets, duplets, quadruplets, quarter- and half-note triplets"><input type="checkbox" id="tuplets" checked aria-label="Tuplets (n-lets)"><span class="tup-ic"></span></label></div>
+          </div>
+          <div class="ctl">
+            <span>Simplicity</span>
+            <div class="inline"><input type="range" id="simplicity" min="0" max="10" step="0.5" value="3"><span class="val" id="simpVal">3</span></div>
+          </div>
+          <div class="ctl">
+            <span>Tempo correction</span>
+            <div class="seg" id="tempoMode">
+              <button data-v="off" class>Off</button><button data-v="steady">Steady</button><button data-v="follow" class="on">Follow drift</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <span>Note lengths</span>
+            <div class="seg" id="lengths">
+              <button data-v="next" class="on">Until next tap</button><button data-v="held">As held</button>
+            </div>
+          </div>
+          <div class="ctl">
+            <span>Longest note</span>
+            <select id="maxLen" style="width:max-content">
+              <option value="0">No limit</option><option value="1">1 beat</option><option value="2">2 beats</option><option value="bar">1 bar</option>
+            </select>
+          </div>
+          <div class="ctl">
+            <span>Ignore double taps</span>
+            <div class="inline"><input type="range" id="debounce" min="0" max="150" step="5" value="60"><span class="val" id="debVal">60 ms</span></div>
+          </div>
+          <div class="ctl">
+            <span>Beat &amp; barlines</span>
+            <div class="barshift">
+              <button class="btn" id="halfT" title="Half the tempo: every note value doubles">½×</button>
+              <button class="btn" id="dblT" title="Double the tempo: every note value halves">2×</button>
+              <span style="width:8px"></span>
+              <button class="btn" id="shiftL" aria-label="Move barlines one beat earlier">◀</button>
+              <span class="val" id="shiftVal">0</span>
+              <button class="btn" id="shiftR" aria-label="Move barlines one beat later">▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-wrap" id="chartWrap"><canvas id="chart" height="170"></canvas></div>
+          <div class="legend">
+            <span><i style="background:var(--good)"></i>&lt; 25 ms</span>
+            <span><i style="background:var(--warn)"></i>25–60 ms</span>
+            <span><i style="background:var(--bad)"></i>&gt; 60 ms off</span>
+          </div>
+        </div>
+        <details><summary>ABC source</summary><pre id="abcOut"></pre></details>
+      </div>
+    </details>
+  </section>
+
+  <details class="more-info" id="howBox"><summary><h2 id="how">Turn a rhythm in your head into notation</h2></summary><div class="prose">
+    <p>Quick start. Three steps, no account, nothing to install.</p>
+    <ol>
+      <li><strong>Tempo.</strong> Tap the beat or type a tempo, and choose a meter.</li>
+      <li><strong>Rhythm.</strong> Press space, then tap the rhythm on the space bar, the mouse or a touch screen, clap it into your microphone, or play it on a MIDI pad or keyboard.</li>
+      <li><strong>Notation.</strong> Read it, play it back, and export it.</li>
+    </ol>
+    <p>Claptoscore writes what you meant rather than exactly what you played. It measures your latency, snaps each beat to the simplest subdivision that fits, follows you when you rush or drag, and ignores accidental double taps.</p>
+    <h3>What it writes</h3>
+    <ul>
+      <li>Quarter, eighth and sixteenth notes, dotted values, ties and rests</li>
+      <li>Eighth-note triplets in simple meters, and 6/8, 9/8 and 12/8 compound meters</li>
+      <li>Tuplets: 5-, 6-, 7-, 9-, 10-, 11-, 12- and 13-lets, quarter- and half-note triplets, duplets and quadruplets, and 32nd notes</li>
+      <li>Two voices on a percussion staff: F for the low voice, J or space for the high voice</li>
+      <li>Free tempo takes without a metronome, with the tempo and barlines worked out afterwards</li>
+    </ul>
+    <h3>Practise solfège and rhythm reading</h3>
+    <p>Clap a rhythm from your solfège book or sight-reading exercise along with the click, then compare what Claptoscore wrote with the page. If they differ, the timing chart shows exactly which note you rushed or dragged. It works for rhythm dictation too: listen, tap back what you heard, and check it.</p>
+    <h3>Share a rhythm as a link</h3>
+    <p>Press <strong>Share</strong> under the notation to get a link to the written rhythm. Whoever opens it can listen to it, clap it back and get a score for every note, or open it here to change it. Tick <strong>Hide the notes</strong> and the link becomes a rhythm dictation: they hear it, tap it back, and only then see the notes. The link holds the rhythm itself, so nothing is uploaded. <a href="https://claptoscore.com/teachers/">How teachers use it</a>.</p>
+    <h3>Counting under the notes</h3>
+    <p>Switch <strong>Count</strong> to Numbers to see 1 e &amp; a under every note, or to Kodály for ta, ti-ti and tika-tika. It works in the lessons too.</p>
+    <p>Playing flamenco or salsa? Clap along with the <a href="https://claptoscore.com/rhythms/">compás and clave patterns</a>: soleá, bulerías, son clave, bossa nova and more, each with accented clicks and scored exercises.</p>
+    <p>New to reading rhythms? Work through the <a href="https://claptoscore.com/lessons/">rhythm reading lessons</a>: ten short lessons from quarter notes to 6/8, where you clap each exercise and get note-by-note feedback.</p>
+    <h3>Tips for a clean result</h3>
+    <ul>
+      <li>Calibrate once per input. Keyboards, Bluetooth headphones and microphones each add their own delay.</li>
+      <li>Use headphones when clapping, so the metronome click does not reach the microphone.</li>
+      <li>If a beat comes out too busy, raise Simplicity; if a real sixteenth is missing, lower it.</li>
+      <li>Hold the key for the length of the note and switch Note lengths to As held to get rests from the gaps.</li>
+    </ul>
+    <p>Everything runs in your browser. Your taps and microphone audio never leave your device. Export any result as <a href="https://abcnotation.com/">ABC notation</a> to open it in MuseScore or other notation software.</p>
+  </div></details>
+  <footer class="sitefoot">
+    <span>Claptoscore CS-1 · free rhythm tools</span>
+    <nav aria-label="Footer"><a href="https://claptoscore.com/lessons/">Lessons</a><a href="https://claptoscore.com/rhythms/">Flamenco &amp; Latin rhythms</a><a href="https://claptoscore.com/metronome/">Metronome</a><a href="https://claptoscore.com/guide/rhythm-notation/">Rhythm notation guide</a><a href="https://claptoscore.com/teachers/">For teachers</a><a href="https://claptoscore.com/privacy/">Privacy</a><a href="https://claptoscore.com/about/">About</a><a href="mailto:edejong@fastmail.fm?subject=Claptoscore%20feedback">Feedback</a><a class="support-link" href="https://ko-fi.com/edwindejong">Support Claptoscore</a></nav>
+    <nav class="langs" aria-label="Language"><a href="https://claptoscore.com/" hreflang="en" lang="en" translate="no" aria-current="true">English</a><a href="https://claptoscore.com/nl/" hreflang="nl" lang="nl" translate="no">Nederlands</a><a href="https://claptoscore.com/es/" hreflang="es" lang="es" translate="no">Español</a><a href="https://claptoscore.com/fr/" hreflang="fr" lang="fr" translate="no">Français</a><a href="https://claptoscore.com/pt/" hreflang="pt" lang="pt-BR" translate="no">Português</a><a href="https://claptoscore.com/zh/" hreflang="zh-Hans" lang="zh-Hans" translate="no">中文</a></nav>
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+</body>
+</html>

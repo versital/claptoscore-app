@@ -1,0 +1,11 @@
+{
+  "name": "claptoscore-app",
+  "private": true,
+  "version": "0.2.2",
+  "description": "Modular local build of the Claptoscore tap-to-notation app",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 5173",
+    "test": "node --test"
+  }
+}
