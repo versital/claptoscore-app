@@ -2,7 +2,7 @@
 // line that scrolls past a fixed playhead; notes turn green / ochre when hit and red when missed, and the run ends
 // with an accuracy percentage. Generation and scoring live in core/practice.js.
 import { S, calib } from '../state.js';
-import { METERS } from '../core/meters.js';
+import { METERS, accentOf } from '../core/meters.js';
 import { toAbc, exercise } from '../core/rhythmCode.js';
 import { generate, scoreRun, noteTimes, windows, groupsFor, levelName, MAX_LEVEL, GOOD_MS, MIX, MIX_NAMES } from '../core/practice.js';
 import { T, plural } from '../services/i18n.js';
@@ -230,7 +230,7 @@ function listen() {
   if (!R) newRhythm();
   audio(); stopPlay(); if (metro.mode) metroStop();
   const M = METERS[R.meter], beatSec = 60 / R.bpm, t0 = ctx.currentTime + 0.15, beats = (P.bars + 1) * M.beats;
-  for (let b = 0; b < beats; b++) click(t0 + b * beatSec, b % M.beats === 0, listenBag);
+  for (let b = 0; b < beats; b++) click(t0 + b * beatSec, accentOf(M, b), listenBag);
   const s0 = t0 + M.beats * beatSec;
   for (const n of R.times) wood(s0 + n.t / 1000, listenBag);
   $('#prListen').innerHTML = `<span class="ic">■</span> ${T('Listen')}`;

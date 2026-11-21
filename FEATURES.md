@@ -115,6 +115,7 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+| **Additive meters** (v0.5.0): Custom… also takes groups such as 2+2+3/8, 3+3+2/8, 3+2/4 or 2+3+2+2/16 (up to 32 beats), and /16 meters (7/16 …). The metronome plays a medium accent on each group start, the beat dots leave a gap between groups, notes are beamed by group and never merged across one, practice rhythms are built group by group; the time signature is drawn stacked (3+2+2 over 8). Share links: meter index 14 | `core/meters.js` `groupStarts`, `accentOf`; `core/engrave.js`; `audio/sounds.js` `click` | ✅ `tests/meters.test.js` · browser |
 | **Rhythm mix** (v0.4.1, Practice): one slider per kind of rhythm in the level (Rare · Less · Normal · More · Lots = ×0.1 … ×5), so e.g. septuplets in level 8 can be made rare without removing them; remembered; Reset to normal | `core/practice.js` `MIX`, `poolFor({ mix })` | ✅ test (Rare: < ⅓ as many 7-lets, still present) · browser |
 | Practice line scrolls by hand while stopped (drag, sideways wheel/trackpad, Shift+wheel); a click that does not move still starts a run, during a run every press is a tap | `features/practice.js` `scrollLine` | ✅ browser |
 | Every tuplet gets a bracket, also when one beam covers exactly its notes (abcjs left those with just the number, so 5- and 7-lets looked different from triplets). One-line patch in `vendor/abcjs-basic-min.js` (`e.hasBeam=!1&&…` in the triplet layout) | `vendor/abcjs-basic-min.js` | ✅ browser |
@@ -197,3 +198,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.3.3 | 2026-11-21 | Practice: Listen scrolls the music along with the sound and lights each note as it plays. |
 | 0.4.0 | 2026-11-21 | Custom meters (n/2, n/4, n/8), no tempo limits (1–9999 BPM), practice beat dots follow the practice meter. `tests/meters.test.js`. |
 | 0.4.1 | 2026-11-21 | Rhythm mix sliders in Practice, scroll the practice line while stopped, brackets on every tuplet (abcjs patch), setting to not jump to the notation after a take. |
+| 0.5.0 | 2026-11-21 | Additive meters (2+2+3/8 …) with group accents and beaming, /16 meters. |

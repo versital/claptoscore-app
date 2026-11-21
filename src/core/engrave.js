@@ -1,4 +1,4 @@
-import { REPR, DOTTED } from './meters.js';
+import { REPR, DOTTED, groupStarts } from './meters.js';
 import { cellAt, tupletOf } from './tuplets.js';
 
 // Engraving decisions for one bar of one voice, shared by the ABC, MusicXML and rhythm-code writers.
@@ -56,7 +56,9 @@ export function barTokens(A, bar, segs) {
     j += span;
   }
   // merge whole-beat pieces into longer values, following common engraving rules
-  const mid = (M.beats % 2 === 0 && M.beats >= 4) ? barTicks / 2 : null;
+  const mid = (M.beats % 2 === 0 && M.beats >= 4 && !M.groups) ? barTicks / 2 : null;
+  // additive meters (2+2+3/8): notes are beamed within a group and never merged across one
+  const gs = groupStarts(M), gTicks = gs ? gs.map(b => b * tpb) : null;
   const canMerge = (x, y) => {
     if (x.trip || y.trip || y.start !== x.start + x.len) return false;
     const same = (x.rest && y.rest) || (!x.rest && !y.rest && x.tieOut && x.id === y.id);
@@ -66,6 +68,7 @@ export function barTokens(A, bar, segs) {
     if (y.len % tpb) { if (M.compound || x.rest || x.len !== tpb || y.len !== tpb / 2) return false; }
     if (x.rest && !M.compound && G.dotted.has(L)) return false;
     if (mid !== null && x.start !== 0 && x.start < mid && x.start + L > mid) return false;
+    if (gTicks && gTicks.some(g => x.start < g && x.start + L > g)) return false;
     return true;
   };
   for (let i = 0; i + 1 < pieces.length;) {
@@ -80,7 +83,7 @@ export function barTokens(A, bar, segs) {
     split(pc.len * p / q).forEach((l, k, parts) => {
       const dur = p === q ? l : l * q / p;
       tokens.push({
-        rest: pc.rest, dur, notated: l, beat: pc.beat, beatStart: k === 0 && pc.start % tpb === 0,
+        rest: pc.rest, dur, notated: l, beat: pc.beat, beatStart: k === 0 && (gTicks ? gTicks.includes(pc.start) : pc.start % tpb === 0),
         tie: !pc.rest && (k < parts.length - 1 || pc.tieOut), trip, at, onset: !pc.rest && k === 0 && !pc.tieIn, id: pc.id,
       });
       at += dur;

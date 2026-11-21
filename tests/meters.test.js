@@ -20,7 +20,10 @@ test('parseMeter: what a custom meter means', () => {
   assert.deepEqual(parseMeter('15/8'), { beats: 5, tpb: 18, compound: true });
   assert.deepEqual(parseMeter('2/2'), { beats: 2, tpb: 24, compound: false });
   assert.deepEqual(parseMeter('6/4'), { beats: 6, tpb: 12, compound: false });
-  for (const bad of ['7/16', '0/4', '33/4', '4/3', 'x', '', '4/4/4']) assert.equal(parseMeter(bad), null, bad);
+  assert.deepEqual(parseMeter('7/16'), { beats: 7, tpb: 3, compound: false });
+  assert.deepEqual(parseMeter('2+2+3/8'), { beats: 7, tpb: 6, compound: false, groups: [2, 2, 3] });
+  assert.deepEqual(parseMeter('3 + 2/4'), { beats: 5, tpb: 12, compound: false, groups: [3, 2] });
+  for (const bad of ['7/32', '0/4', '33/4', '4/3', 'x', '', '4/4/4', '2+0/8', '20+20/8', '+2/8', '2+/8']) assert.equal(parseMeter(bad), null, bad);
   assert.equal(METERS['7/8'].beats, 7);
   assert.equal(METERS['nope'], undefined);
   assert.equal(METERS['4/4'].tpb, 12);                 // the original seven are unchanged
@@ -115,4 +118,37 @@ test('practice rhythms fill custom meters', () => {
       const ex = RC.exercise(r, 4);
       assert.equal(new Set(ex.heads).size, n.length, `${meter} L${level} s${seed}: every note drawn`);
     }
+});
+
+test('additive meters: accents, beaming by group, share links', async () => {
+  const { accentOf, groupStarts } = await import('../src/core/meters.js');
+  const M = METERS['3+2+2/8'];
+  assert.deepEqual(groupStarts(M), [0, 3, 5]);
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7].map(b => accentOf(M, b)), [2, 0, 0, 1, 0, 1, 0, 2]);
+  assert.deepEqual([0, 1, 4].map(b => accentOf(METERS['4/4'], b)), [2, 0, 2]);
+  // eighths in 3+2+2/8: beamed 3 + 2 + 2 (spaces only at group starts)
+  const A = analyze(take([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], { meter: '3+2+2/8', jitter: 0 }), DEFAULT_OPT, LAT);
+  const line = toAbc(A).split('\n').find(l => l.includes('|'));
+  assert.ok(line.startsWith('B6B6B6 B6B6 B6B6 |'), line);
+  assert.ok(toAbc(A).includes('M:3+2+2/8'));
+  // a note from beat 2 to beat 4 crosses the group at 3: written tied, not as one quarter across it
+  const B = analyze(take([0, 1, 2, 4, 5, 6, 7], { meter: '3+2+2/8', jitter: 0 }), { ...DEFAULT_OPT, maxLen: 0 }, LAT);
+  wholeBars(B);
+  const toks = barTokens(B, B.startBar, B.voices[0].segs).tokens;
+  for (const t of toks) { const s = t.at - B.startBar * B.barTicks; assert.ok(!(s < 18 && s + t.dur > 18), 'no value across the group at beat 3'); }
+  // MIDI time signature: 7/8
+  const midi = toMidi(A); let i = 0; while (i < midi.length - 3 && !(midi[i] === 0xff && midi[i + 1] === 0x58)) i++;
+  assert.equal(midi[i + 3], 7);
+  // links
+  for (const meter of ['2+2+3/8', '3+3+2/8', '3+2/4', '2+3+2+2/16']) {
+    const X = analyze(take([0, 1, 2, 3, 4, 5, 6, 7], { meter, jitter: 0 }), DEFAULT_OPT, LAT);
+    const back = RC.decode(RC.encode(rhythmOf(X)));
+    assert.equal(back.meter, meter);
+    assert.ok(!/NaN|undefined/.test(RC.toAbc(back)));
+  }
+  // practice: groups are filled one by one, so no written value crosses a group
+  for (let seed = 1; seed <= 10; seed++) for (const level of [1, 3, 5]) {
+    const r = generate({ meter: '3+2+2/8', bars: 2, level, seed }), tpb = 6 * r.u;
+    for (const n of r.voices[0]) for (const g of [3, 5, 7, 10, 12]) assert.ok(!(n.start < g * tpb && n.end > g * tpb), `seed ${seed} L${level}`);
+  }
 });

@@ -1,5 +1,6 @@
 // Custom meters in the meter menus (Tempo panel and Practice tab). "Custom…" opens a small field for n/d
-// (d = 2, 4 or 8, n up to 32); meters you add are remembered and listed in both menus.
+// (d = 2, 4, 8 or 16, n up to 32) or an additive meter such as 2+2+3/8; meters you add are remembered and listed
+// in both menus.
 import { METER_IDS, parseMeter, MAX_NUM } from '../core/meters.js';
 import { T } from '../services/i18n.js';
 import { store } from '../services/store.js';
@@ -30,9 +31,9 @@ function addMeter(m) {
 export function bindMeterSelect(sel) {
   let prev = sel.value;
   const field = document.createElement('input');
-  Object.assign(field, { type: 'text', className: 'meter-custom', placeholder: '7/8', maxLength: 5, hidden: true, autocomplete: 'off' });
-  field.setAttribute('aria-label', T('Custom meter, for example 7/8'));
-  field.title = T('Any meter n/2, n/4 or n/8, n up to {n}', { n: MAX_NUM });
+  Object.assign(field, { type: 'text', className: 'meter-custom', placeholder: '2+2+3/8', maxLength: 16, hidden: true, autocomplete: 'off' });
+  field.setAttribute('aria-label', T('Custom meter, for example 7/8 or 2+2+3/8'));
+  field.title = T('n/2, n/4, n/8 or n/16 (n up to {n}), or groups such as 2+2+3/8 or 3+2/4', { n: MAX_NUM });
   sel.after(field);
   // runs before the menu's own change handler (capture), so "custom" never reaches it
   sel.addEventListener('change', e => {
@@ -44,7 +45,7 @@ export function bindMeterSelect(sel) {
     const m = field.value.replace(/\s+/g, '');
     field.hidden = true;
     if (!apply || !m) return;
-    if (!parseMeter(m)) { toast(T('Use n/2, n/4 or n/8 with n from 1 to {n}', { n: MAX_NUM })); return; }
+    if (!parseMeter(m)) { toast(T('Use n/2, n/4, n/8 or n/16 (n up to {n}), or groups like 2+2+3/8', { n: MAX_NUM })); return; }
     if (!METER_IDS.includes(m)) addMeter(m);
     $$('select.meter-select').forEach(s => fillMeterSelect(s, s === sel ? m : s.value));
     prev = m;

@@ -1,5 +1,5 @@
 // The beat dots under the tempo (preview) and the rhythm pad (recording), driven by the metronome's visQ.
-import { METERS } from '../core/meters.js';
+import { METERS, groupStarts } from '../core/meters.js';
 import { metro, visQ } from '../audio/metronome.js';
 import { $ } from './dom.js';
 
@@ -8,7 +8,8 @@ export function buildDots(meter, ids = ['#dots1', '#dots2']) {
   const M = METERS[meter];
   for (const id of ids) {
     const el = $(id); el.innerHTML = '';
-    for (let i = 0; i < M.beats; i++) { const d = document.createElement('span'); d.className = 'dot' + (i === 0 ? ' down' : ''); el.appendChild(d); }
+    const gs = groupStarts(M) || [];  // additive meters: a gap before each group
+    for (let i = 0; i < M.beats; i++) { const d = document.createElement('span'); d.className = 'dot' + (i === 0 ? ' down' : gs.includes(i) ? ' grp' : ''); el.appendChild(d); }
   }
 }
 

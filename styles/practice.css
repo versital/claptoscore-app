@@ -74,7 +74,7 @@ body:not([data-tab="practice"]) .practice { display: none; }
 .vol-row { justify-content: flex-end; }
 
 /* custom meter field next to a meter menu */
-.meter-custom { width: 4.2em; font: 600 13px/1 var(--mono); padding: 6px 6px; text-align: center; margin-left: 6px; }
+.meter-custom { width: 6.5em; font: 600 13px/1 var(--mono); padding: 6px 6px; text-align: center; margin-left: 6px; }
 .bpm input.four { font-size: 46px; width: calc(2.75em + 12px); }
 
 /* rhythm mix */
@@ -83,3 +83,4 @@ body:not([data-tab="practice"]) .practice { display: none; }
 .pr-mix-row input[type="range"] { width: 100px; }
 .pr-mix-row .val { font: 600 10.5px/1 var(--mono); color: var(--ink-3); text-transform: uppercase; }
 .pr-stage.dragging { cursor: grabbing; }
+.dots .dot.grp { margin-left: 9px; }  /* additive meters: a gap before each group */

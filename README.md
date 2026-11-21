@@ -57,7 +57,8 @@ tests/practice.test.js practice rhythms (every level and meter) and scoring
 
 ### Meters
 `METERS` holds the seven original meters and parses any other "n/d" (d = 2, 4, 8) on first use (`parseMeter`):
-`M.tpb` is then 24 (half-note beat), 6 (eighth-note beat) or 18 (compound). Use `beatUnit(M)` for the tempo's note
+`M.tpb` is then 24 (half-note beat), 6 (eighth-note beat), 3 (sixteenth) or 18 (compound). Additive meters (2+2+3/8) add
+`M.groups`; use `groupStarts(M)` / `accentOf(M, beat)`. Use `beatUnit(M)` for the tempo's note
 value; never assume a beat is a quarter.
 
 ### Ticks and tuplets

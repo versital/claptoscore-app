@@ -11,9 +11,13 @@ export function blip(time, freq, gain, dur, type, bag, out = master) {
   if (bag) bag.push(o);
 }
 // With the mic on, the click becomes a low pure tone that the mic's high-pass filter rejects.
-export const click = (t, accent, bag) => audioFlags.micOn
-  ? blip(t, accent ? 1000 : 700, accent ? 0.6 : 0.4, 0.04, 'sine', bag, clickBus)
-  : blip(t, accent ? 1900 : 1250, accent ? 0.55 : 0.32, 0.03, 'triangle', bag, clickBus);
+// accent: true / 2 = downbeat, 1 = start of a group (additive meters), false / 0 = other beats.
+export const click = (t, accent, bag) => {
+  const a = accent === true ? 2 : accent || 0;
+  return audioFlags.micOn
+    ? blip(t, [700, 850, 1000][a], [0.4, 0.5, 0.6][a], 0.04, 'sine', bag, clickBus)
+    : blip(t, [1250, 1550, 1900][a], [0.32, 0.45, 0.55][a], 0.03, 'triangle', bag, clickBus);
+};
 export const softClick = (t, bag) => blip(t, audioFlags.micOn ? 500 : 900, 0.12, 0.02, audioFlags.micOn ? 'sine' : 'triangle', bag, clickBus);
 // The written rhythm plays as a woodblock (high voice) and a kick (low voice).
 export const wood = (t, bag) => { blip(t, 740, 0.7, 0.07, 'sine', bag); blip(t, 2200, 0.18, 0.015, 'square', bag); };

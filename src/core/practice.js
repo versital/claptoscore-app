@@ -85,11 +85,14 @@ export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom
   // Patterns are written per quarter note (simple meters) or dotted quarter (compound), whatever the meter's beat:
   // in 2/2 a bar holds 4 quarter slots, in 7/8 three and a half (the half is filled with eighth-note patterns).
   const unitT = M.compound ? M.tpb : 12, units = M.compound ? M.beats : M.beats * M.tpb / 12, barT = M.beats * M.tpb;
+  // segments of a bar, in units: additive meters are filled group by group, so no pattern crosses a group
+  const segs = M.groups ? M.groups.map(g => g * M.tpb / 12) : [units];
   const ids = new Set(pool.map(x => x.g));
   const half = [P(0.5, 2, [[0, 1]])];
   if (ids.has('eighths')) half.push(P(0.5, 2, []));
   if (ids.has('sixteenths')) half.push(P(0.5, 4, [[0, 1], [1, 1]]));
   if (ids.has('sixteenthRests')) half.push(P(0.5, 4, [[1, 1]]));
+  const quarter = [P(0.25, 4, [[0, 1]])];  // a sixteenth left over (n/16 meters)
   const placed = [];  // [tick at u = 1, pattern]
   const pick = (room, beat) => {
     // long patterns start on strong beats only (a half note on beat 1 or 3 in 4/4), and never cross the barline
@@ -99,13 +102,18 @@ export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom
     return ok[ok.length - 1].p;
   };
   for (let bar = 0; bar < bars; bar++) {
-    let beat = 0, barNotes = 0;
-    while (beat < units) {
-      let p = units - beat >= 1 ? pick(Math.floor(units - beat), beat) : half[Math.floor(rand() * half.length)];
-      // a bar of nothing but rests is no exercise: its last chance gets a note
-      if (!p.n.length && !barNotes && beat + p.b >= units) p = p.b < 1 ? half[0] : pool.find(x => x.p.b === 1 && x.p.n.length).p;
-      placed.push([bar * barT + beat * unitT, p]);
-      barNotes += p.n.length; beat += p.b;
+    let at = 0, barNotes = 0;
+    for (const seg of segs) {
+      let beat = 0;
+      while (beat < seg - 1e-9) {
+        const room = seg - beat;
+        let p = room >= 1 ? pick(Math.floor(room), beat) : room >= 0.5 ? half[Math.floor(rand() * half.length)] : quarter[0];
+        // a bar of nothing but rests is no exercise: its last chance gets a note
+        if (!p.n.length && !barNotes && at + beat + p.b >= units - 1e-9) p = p.b < 1 ? half[0] : pool.find(x => x.p.b === 1 && x.p.n.length).p;
+        placed.push([bar * barT + (at + beat) * unitT, p]);
+        barNotes += p.n.length; beat += p.b;
+      }
+      at += seg;
     }
   }
   // the finest tick grid the chosen patterns need (u = 5 for quintuplets, 7 for septuplets ...)

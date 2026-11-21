@@ -1,6 +1,6 @@
 // Look-ahead metronome: a 20 ms timer schedules clicks ~120 ms ahead on the audio clock, and queues each beat's
 // performance.now() time in visQ for the beat dots (ui/beatDots.js).
-import { METERS } from '../core/meters.js';
+import { METERS, accentOf } from '../core/meters.js';
 import { audio, ctx, audioToPerf } from './context.js';
 import { click, softClick } from './sounds.js';
 
@@ -12,7 +12,7 @@ export const visQ = [];
 export function metroStart({ bpm, meter, audible = () => true, onBeat = null, subdiv = false, mode, onStop = null }) {
   audio(); metroStop();
   const M = METERS[meter];
-  Object.assign(metro, { running: true, mode, beat: 0, beatSec: 60 / bpm, bpb: M.beats, compound: M.compound, audible, onBeat, subdiv, onStop, t0: ctx.currentTime + 0.15 });
+  Object.assign(metro, { running: true, mode, beat: 0, beatSec: 60 / bpm, bpb: M.beats, M, compound: M.compound, audible, onBeat, subdiv, onStop, t0: ctx.currentTime + 0.15 });
   metro.timer = setInterval(metroTick, 20); metroTick();
 }
 function metroTick() {
@@ -22,7 +22,7 @@ function metroTick() {
     const perf = audioToPerf(t);
     if (metro.onBeat && metro.onBeat(b, perf) === false) { metroStop(); return; }
     if (metro.audible(b)) {
-      click(t, b % metro.bpb === 0);
+      click(t, accentOf(metro.M, b));
       if (metro.subdiv) { const n = metro.compound ? 3 : 2; for (let k = 1; k < n; k++) softClick(t + k * metro.beatSec / n); }
     }
     visQ.push({ perf, b });

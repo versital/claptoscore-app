@@ -13,20 +13,38 @@ const BASE_METERS = {
 // Order matters: the index is stored in rhythm codes (share links).
 export const METER_IDS = ['2/4', '3/4', '4/4', '5/4', '6/8', '9/8', '12/8'];
 
-// Custom meters (this build): "n/d" with n = 1..32 and d = 2, 4 or 8.
-//   n/4: n quarter-note beats (12 ticks) · n/2: n half-note beats (24 ticks)
+// Custom meters (this build): "n/d" with n = 1..32 and d = 2, 4, 8 or 16, or additive "a+b+c/d" (2+2+3/8).
+//   n/4: n quarter-note beats (12 ticks) · n/2: n half-note beats (24 ticks) · n/16: n sixteenth beats (3 ticks)
 //   n/8 with n divisible by 3 (3/8, 15/8 …): compound, n/3 dotted-quarter beats (18 ticks), like 6/8
 //   other n/8 (5/8, 7/8, 11/8 …): n eighth-note beats (6 ticks)
+//   a+b+c/d: a+b+c beats of 1/d, in groups: the metronome accents each group, notes are beamed by group and
+//   never merged across a group (M.groups = [a, b, c])
 // Ticks stay 1/48 notes everywhere, so the writers need no change; only the beat length differs.
-export const MAX_NUM = 32, DENOMS = [2, 4, 8];
+export const MAX_NUM = 32, DENOMS = [2, 4, 8, 16];
 export function parseMeter(id) {
-  const m = /^(\d{1,2})\/(\d{1,2})$/.exec(String(id).trim());
+  const m = /^(\d{1,2}(?:\+\d{1,2})*)\/(\d{1,2})$/.exec(String(id).replace(/\s+/g, ''));
   if (!m) return null;
-  const n = +m[1], d = +m[2];
-  if (n < 1 || n > MAX_NUM || !DENOMS.includes(d)) return null;
+  const parts = m[1].split('+').map(Number), n = parts.reduce((a, b) => a + b, 0), d = +m[2];
+  if (parts.some(x => x < 1) || n > MAX_NUM || !DENOMS.includes(d)) return null;
+  if (parts.length > 1) return { beats: n, tpb: 48 / d, compound: false, groups: parts };
   if (d === 8 && n % 3 === 0) return { beats: n / 3, tpb: 18, compound: true };
   return { beats: n, tpb: 48 / d, compound: false };
 }
+// The beat numbers (within a bar) where a group starts, for additive meters; null otherwise.
+export function groupStarts(M) {
+  if (!M.groups) return null;
+  const out = []; let b = 0;
+  for (const g of M.groups) { out.push(b); b += g; }
+  return out;
+}
+// Metronome accent for beat b: 2 downbeat, 1 start of a group (additive meters), 0 other beats.
+export function accentOf(M, b) {
+  const k = ((b % M.beats) + M.beats) % M.beats;
+  if (k === 0) return 2;
+  return M.groups && groupStarts(M).includes(k) ? 1 : 0;
+}
+// The numerator as a number (2+2+3/8 -> 7), for MIDI.
+export const meterNumber = id => String(id).split('/')[0].split('+').reduce((a, b) => a + +b, 0);
 // METERS['7/8'] works for any valid id: unknown ids are parsed (and cached) on first use, invalid ones are undefined.
 export const METERS = new Proxy(BASE_METERS, {
   get(t, k) {
@@ -39,7 +57,7 @@ export const METERS = new Proxy(BASE_METERS, {
 });
 // The tempo's beat unit as an ABC fraction / MusicXML type, and the factor from beats to quarter notes.
 export const beatUnit = M => M.compound ? { abc: '3/8', xml: 'quarter', dot: true, quarters: 1.5 }
-  : { abc: '1/' + 48 / M.tpb, xml: { 24: 'half', 12: 'quarter', 6: 'eighth' }[M.tpb], dot: false, quarters: M.tpb / 12 };
+  : { abc: '1/' + 48 / M.tpb, xml: { 24: 'half', 12: 'quarter', 6: 'eighth', 3: '16th' }[M.tpb], dot: false, quarters: M.tpb / 12 };
 
 export const REPR = [72, 48, 36, 24, 18, 12, 9, 6, 3]; // single-glyph lengths in 1/48 notes
 export const REPR_SET = new Set(REPR);

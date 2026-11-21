@@ -1,5 +1,6 @@
 // Play the written score (q) or the raw taps (r) over a click track. Pressing the same key again stops.
 import { S } from '../state.js';
+import { accentOf } from '../core/meters.js';
 import { audio, ctx } from './context.js';
 import { click, wood, kick } from './sounds.js';
 import { metro, metroStop } from './metronome.js';
@@ -19,7 +20,7 @@ export function play(kind) {
   const beatSec = 60 / A.R.bpm, t0 = ctx.currentTime + 0.15, origin = A.startBar * A.M.beats;
   const beats = (A.endBar - A.startBar) * A.M.beats;
   const hit = (t, v) => v === 2 ? kick(t, playBag) : wood(t, playBag);
-  for (let b = 0; b < beats; b++) click(t0 + b * beatSec, b % A.M.beats === 0, playBag);
+  for (let b = 0; b < beats; b++) click(t0 + b * beatSec, accentOf(A.M, b), playBag);
   if (kind === 'q') for (const n of A.notes) hit(t0 + (n.start / A.tpb - origin) * beatSec, n.v);
   else for (const x of A.used) hit(t0 + (x.t / 1000 - origin * beatSec), x.v);
   playing = kind;

@@ -18,8 +18,9 @@
    Version 2 (this build, for tuplets and 32nds): the same, with a varint u right after the tempo; ticks are then
    12u per quarter. Version 1 is still written whenever the rhythm fits it, so ordinary links are unchanged.
    A custom meter (7/8, 2/2 …) has meter index 15 and needs version 2: two varints (numerator, denominator) follow u.
+   An additive meter (2+2+3/8) has index 14: after u a varint group count, one varint per group, then the denominator.
    Version 2 also carries tempos outside the original 20–400 BPM. */
-const CUSTOM = 15, BPM_MIN = 1, BPM_MAX = 9999;
+const CUSTOM = 15, GROUPED = 14, BPM_MIN = 1, BPM_MAX = 9999;
 import { METERS, METER_IDS, parseMeter, beatUnit } from './meters.js';
 import { barTokens } from './engrave.js';
 import { abcTokens } from './abcText.js';
@@ -90,13 +91,14 @@ function fitsV1(M, voices) {
 // quarter; default 1) }
 export function encode(r) {
   let mi = METER_IDS.indexOf(r.meter);
-  if (mi < 0) { if (!parseMeter(r.meter)) throw new Error('meter'); mi = CUSTOM; }
+  if (mi < 0) { const M = parseMeter(r.meter); if (!M) throw new Error('meter'); mi = M.groups ? GROUPED : CUSTOM; }
   const two = r.voices.length > 1, u = r.u || 1, bpm = Math.max(BPM_MIN, Math.min(BPM_MAX, Math.round(r.bpm)));
-  const v2 = r.u !== undefined || mi === CUSTOM || bpm < 20 || bpm > 400 || !fitsV1(METERS[r.meter], two ? r.voices.slice(0, 2) : r.voices.slice(0, 1));
+  const v2 = r.u !== undefined || mi >= GROUPED || bpm < 20 || bpm > 400 || !fitsV1(METERS[r.meter], two ? r.voices.slice(0, 2) : r.voices.slice(0, 1));
   const bytes = [v2 ? 2 : 1, mi | (r.hide ? HIDE : 0) | (two ? TWO : 0)];
   putVar(bytes, bpm);
   if (v2) putVar(bytes, u);
   if (mi === CUSTOM) { const [n, d] = r.meter.split('/').map(Number); putVar(bytes, n); putVar(bytes, d); }
+  if (mi === GROUPED) { const M = parseMeter(r.meter); putVar(bytes, M.groups.length); M.groups.forEach(g => putVar(bytes, g)); putVar(bytes, 48 / M.tpb); }
   for (const v of (two ? r.voices.slice(0, 2) : r.voices.slice(0, 1))) {
     const notes = [...v].sort((a, b) => a.start - b.start);
     putVar(bytes, notes.length);
@@ -114,8 +116,8 @@ export function decode(code) {
   if (a[0] !== 1 && a[0] !== 2) throw new Error('unknown version');
   if (code.length > MAX_CODE[a[0]]) throw new Error('not a rhythm code');
   let meter = METER_IDS[a[1] & 15];
-  const custom = (a[1] & 15) === CUSTOM;
-  if (!meter && !custom) throw new Error('meter');
+  const custom = (a[1] & 15) === CUSTOM, grouped = (a[1] & 15) === GROUPED;
+  if (!meter && !custom && !grouped) throw new Error('meter');
   const bpm = getVar(a, pos), v2 = a[0] === 2;
   if (v2 ? bpm < BPM_MIN || bpm > BPM_MAX : bpm < 20 || bpm > 400) throw new Error('tempo');
   const u = v2 ? getVar(a, pos) : 1;
@@ -123,6 +125,13 @@ export function decode(code) {
   if (custom) {
     if (!v2) throw new Error('meter');
     meter = getVar(a, pos) + '/' + getVar(a, pos);
+    if (!parseMeter(meter)) throw new Error('meter');
+  }
+  if (grouped) {
+    const k = v2 ? getVar(a, pos) : 0;
+    if (k < 2 || k > 16) throw new Error('meter');
+    const parts = []; for (let i = 0; i < k; i++) parts.push(getVar(a, pos));
+    meter = parts.join('+') + '/' + getVar(a, pos);
     if (!parseMeter(meter)) throw new Error('meter');
   }
   const M = METERS[meter], barTicks = M.beats * M.tpb * u, limit = MAX_BARS * barTicks;
