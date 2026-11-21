@@ -1,4 +1,4 @@
-import { beatUnit } from './meters.js';
+import { beatUnit, writtenMeter } from './meters.js';
 import { barTokens } from './engrave.js';
 
 // MusicXML 4.0 export (Pro). One percussion part; one voice = hand clap, two voices = snare (up) + kick (down).
@@ -8,7 +8,7 @@ const XML_TYPE = { 72: ['whole', 1], 48: ['whole', 0], 36: ['half', 1], 24: ['ha
 // opts.title: work title; opts.date: encoding date (YYYY-MM-DD), defaults to today.
 export function toMusicXml(A, { title, date = new Date().toISOString().slice(0, 10) }) {
   const { M, R, barTicks } = A, u = A.tpb / M.tpb;  // u > 1: finer ticks for tuplets (divisions 12u)
-  const [num, den] = R.meter.split('/');
+  const [num, den] = writtenMeter(R.meter, M).split('/');  // 4/3 is written (and exported) as 4/2
   const unit = beatUnit(M), quarterBpm = R.bpm * unit.quarters;
   const two = A.twoVoice;
   // voice 1: clap (one voice) or snare (two voices) on C5/B4 stems up; voice 2: kick on F4 stems down

@@ -33,7 +33,7 @@ export function bindMeterSelect(sel) {
   const field = document.createElement('input');
   Object.assign(field, { type: 'text', className: 'meter-custom', placeholder: '2+2+3/8', maxLength: 16, hidden: true, autocomplete: 'off' });
   field.setAttribute('aria-label', T('Custom meter, for example 7/8 or 2+2+3/8'));
-  field.title = T('n/2, n/4, n/8 or n/16 (n up to {n}), or groups such as 2+2+3/8 or 3+2/4', { n: MAX_NUM });
+  field.title = T('Any n/d (n up to {n}, d from 2 to 64): 7/8, 2/2, 4/3, 5/6 …, or groups such as 2+2+3/8', { n: MAX_NUM });
   sel.after(field);
   // runs before the menu's own change handler (capture), so "custom" never reaches it
   sel.addEventListener('change', e => {
@@ -45,7 +45,7 @@ export function bindMeterSelect(sel) {
     const m = field.value.replace(/\s+/g, '');
     field.hidden = true;
     if (!apply || !m) return;
-    if (!parseMeter(m)) { toast(T('Use n/2, n/4, n/8 or n/16 (n up to {n}), or groups like 2+2+3/8', { n: MAX_NUM })); return; }
+    if (!parseMeter(m)) { toast(T('Use n/d with n up to {n} and d from 2 to 64 (7/8, 4/3, 5/6 …), or groups like 2+2+3/8', { n: MAX_NUM })); return; }
     if (!METER_IDS.includes(m)) addMeter(m);
     $$('select.meter-select').forEach(s => fillMeterSelect(s, s === sel ? m : s.value));
     prev = m;

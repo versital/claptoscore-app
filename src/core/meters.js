@@ -20,16 +20,30 @@ export const METER_IDS = ['2/4', '3/4', '4/4', '5/4', '6/8', '9/8', '12/8'];
 //   a+b+c/d: a+b+c beats of 1/d, in groups: the metronome accents each group, notes are beamed by group and
 //   never merged across a group (M.groups = [a, b, c])
 // Ticks stay 1/48 notes everywhere, so the writers need no change; only the beat length differs.
-export const MAX_NUM = 32, DENOMS = [2, 4, 8, 16];
+//   Irrational meters (any other denominator, 2 to 64: 4/3, 5/6, 7/12, 3/5 …): the beat is 1/d of a whole note,
+//   which has no note value of its own. They are written as the meter with the next lower power of two
+//   (4/3 -> 4/2, 5/6 -> 5/4, 7/12 -> 7/8, 3/5 -> 3/4), every note implicitly a d:D tuplet (3:2, 5:4 …): the
+//   score shows the real time signature and the ratio by the tempo; timing and detection are the written meter's
+//   (the tempo is per beat either way). M.irr = { d, D }; M.written = the written meter (MusicXML and MIDI use it).
+export const MAX_NUM = 32, DENOMS = [2, 4, 8, 16], MAX_DEN = 64;
 export function parseMeter(id) {
   const m = /^(\d{1,2}(?:\+\d{1,2})*)\/(\d{1,2})$/.exec(String(id).replace(/\s+/g, ''));
   if (!m) return null;
   const parts = m[1].split('+').map(Number), n = parts.reduce((a, b) => a + b, 0), d = +m[2];
-  if (parts.some(x => x < 1) || n > MAX_NUM || !DENOMS.includes(d)) return null;
+  if (parts.some(x => x < 1) || n > MAX_NUM || d < 2 || d > MAX_DEN) return null;
+  if (!DENOMS.includes(d)) {
+    const D = Math.min(16, 2 ** Math.floor(Math.log2(d))), written = m[1] + '/' + D, W = parseMeter(written);
+    const g = (a, b) => b ? g(b, a % b) : a, k = g(d, D);
+    return W && { ...W, irr: { d, D, p: d / k, q: D / k }, written };
+  }
   if (parts.length > 1) return { beats: n, tpb: 48 / d, compound: false, groups: parts };
   if (d === 8 && n % 3 === 0) return { beats: n / 3, tpb: 18, compound: true };
   return { beats: n, tpb: 48 / d, compound: false };
 }
+// The meter as written in exports that need a power-of-two denominator (MusicXML, MIDI): 4/3 -> 4/2.
+export const writtenMeter = (id, M) => (M && M.written) || id;
+// ABC tempo line: an irrational meter names its ratio ("3:2" before the beat note).
+export const abcTempo = (M, bpm) => `Q:${M.irr ? `"${M.irr.p}:${M.irr.q}" ` : ''}${beatUnit(M).abc}=${Math.round(bpm)}`;
 // The beat numbers (within a bar) where a group starts, for additive meters; null otherwise.
 export function groupStarts(M) {
   if (!M.groups) return null;

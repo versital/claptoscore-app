@@ -23,7 +23,7 @@ test('parseMeter: what a custom meter means', () => {
   assert.deepEqual(parseMeter('7/16'), { beats: 7, tpb: 3, compound: false });
   assert.deepEqual(parseMeter('2+2+3/8'), { beats: 7, tpb: 6, compound: false, groups: [2, 2, 3] });
   assert.deepEqual(parseMeter('3 + 2/4'), { beats: 5, tpb: 12, compound: false, groups: [3, 2] });
-  for (const bad of ['7/32', '0/4', '33/4', '4/3', 'x', '', '4/4/4', '2+0/8', '20+20/8', '+2/8', '2+/8']) assert.equal(parseMeter(bad), null, bad);
+  for (const bad of ['7/65', '4/1', '0/4', '33/4', 'x', '', '4/4/4', '2+0/8', '20+20/8', '+2/8', '2+/8']) assert.equal(parseMeter(bad), null, bad);
   assert.equal(METERS['7/8'].beats, 7);
   assert.equal(METERS['nope'], undefined);
   assert.equal(METERS['4/4'].tpb, 12);                 // the original seven are unchanged
@@ -150,5 +150,31 @@ test('additive meters: accents, beaming by group, share links', async () => {
   for (let seed = 1; seed <= 10; seed++) for (const level of [1, 3, 5]) {
     const r = generate({ meter: '3+2+2/8', bars: 2, level, seed }), tpb = 6 * r.u;
     for (const n of r.voices[0]) for (const g of [3, 5, 7, 10, 12]) assert.ok(!(n.start < g * tpb && n.end > g * tpb), `seed ${seed} L${level}`);
+  }
+});
+
+test('irrational meters (4/3, 5/6, 7/12 …): written in the next power of two, ratio by the tempo', () => {
+  assert.deepEqual(parseMeter('4/3'), { beats: 4, tpb: 24, compound: false, irr: { d: 3, D: 2, p: 3, q: 2 }, written: '4/2' });
+  assert.deepEqual(parseMeter('5/6').irr, { d: 6, D: 4, p: 3, q: 2 });
+  assert.equal(parseMeter('6/12').compound, true);                  // written 6/8
+  assert.equal(parseMeter('7/12').written, '7/8');
+  assert.deepEqual(parseMeter('3/5').irr, { d: 5, D: 4, p: 5, q: 4 });
+  assert.deepEqual(parseMeter('2+2+3/12').groups, [2, 2, 3]);
+  assert.equal(parseMeter('5/48').written, '5/16');
+  for (const [meter, ratio] of [['4/3', '3:2'], ['5/6', '3:2'], ['3/5', '5:4'], ['7/12', '3:2'], ['6/12', '3:2'], ['2+3/6', '3:2'], ['5/7', '7:4']]) {
+    const A = analyze(take([0, 1, 1.5, 2, 3, 4, 4.5, 5, 6, 7], { meter, jitter: 0 }), DEFAULT_OPT, LAT);
+    assert.ok(!A.empty, meter);
+    wholeBars(A);
+    const abc = toAbc(A);
+    assert.ok(abc.includes(`M:${meter}`) && abc.includes(`Q:"${ratio}"`) && !/NaN|undefined/.test(abc), meter + '\n' + abc);
+    const xml = toMusicXml(A, { title: 't' }), [wn, wd] = parseMeter(meter).written.split('/');
+    assert.ok(xml.includes(`<beat-type>${wd}</beat-type>`) && !/NaN|undefined/.test(xml), meter);
+    const midi = toMidi(A); let i = 0; while (i < midi.length - 4 && !(midi[i] === 0xff && midi[i + 1] === 0x58)) i++;
+    assert.equal(2 ** midi[i + 4], +wd, meter + ' MIDI denominator');
+    const back = RC.decode(RC.encode(rhythmOf(A)));
+    assert.equal(back.meter, meter);
+    assert.ok(RC.toAbc(back).includes(`M:${meter}`));
+    const r = generate({ meter, bars: 2, level: 4, seed: 3 });
+    assert.ok(r.voices[0].length > 0 && RC.exercise(r, 2).bars === 2, meter);
   }
 });

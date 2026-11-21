@@ -21,7 +21,7 @@
    An additive meter (2+2+3/8) has index 14: after u a varint group count, one varint per group, then the denominator.
    Version 2 also carries tempos outside the original 20–400 BPM. */
 const CUSTOM = 15, GROUPED = 14, BPM_MIN = 1, BPM_MAX = 9999;
-import { METERS, METER_IDS, parseMeter, beatUnit } from './meters.js';
+import { METERS, METER_IDS, parseMeter, abcTempo } from './meters.js';
 import { barTokens } from './engrave.js';
 import { abcTokens } from './abcText.js';
 import { quantize } from './quantize.js';
@@ -98,7 +98,7 @@ export function encode(r) {
   putVar(bytes, bpm);
   if (v2) putVar(bytes, u);
   if (mi === CUSTOM) { const [n, d] = r.meter.split('/').map(Number); putVar(bytes, n); putVar(bytes, d); }
-  if (mi === GROUPED) { const M = parseMeter(r.meter); putVar(bytes, M.groups.length); M.groups.forEach(g => putVar(bytes, g)); putVar(bytes, 48 / M.tpb); }
+  if (mi === GROUPED) { const M = parseMeter(r.meter); putVar(bytes, M.groups.length); M.groups.forEach(g => putVar(bytes, g)); putVar(bytes, +r.meter.split('/')[1]); }
   for (const v of (two ? r.voices.slice(0, 2) : r.voices.slice(0, 1))) {
     const notes = [...v].sort((a, b) => a.start - b.start);
     putVar(bytes, notes.length);
@@ -253,7 +253,7 @@ const lyricEsc = s => s.replace(/-/g, '\\-').replace(/ /g, '~');
 // ---------- ABC for a decoded rhythm (the share page and its exercise card) ----------
 export function toAbc(r, { count = 'off', perLine = 4, font = 'Geist 9' } = {}) {
   const A = layout(r), M = A.M;
-  const head = ['X:1', `M:${r.meter}`, 'L:1/48', `Q:${beatUnit(M).abc}=${Math.round(r.bpm)}`];
+  const head = ['X:1', `M:${r.meter}`, 'L:1/48', abcTempo(M, r.bpm)];
   const u = A.tpb / M.tpb, unit = u === 1 ? x => x : notes => notes.map(n => ({ start: n.start / u, end: n.end / u }));
   const systems = [];
   for (let bar = 0; bar < A.endBar; bar += perLine) systems.push([bar, Math.min(A.endBar, bar + perLine)]);
