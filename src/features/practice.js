@@ -11,12 +11,13 @@ import { audio, ctx, audioToPerf } from '../audio/context.js';
 import { click, wood } from '../audio/sounds.js';
 import { metro, metroStart, metroStop } from '../audio/metronome.js';
 import { stopPlay } from '../audio/playback.js';
-import { $, $$, css, toast } from '../ui/dom.js';
+import { $, $$, css, toast, isTyping } from '../ui/dom.js';
 import { finishCalib } from './calibration.js';
 import { rec } from '../state.js';
 import { stopRecording } from './recorder.js';
 import { buildDots } from '../ui/beatDots.js';
 import { fillMeterSelect } from './meterPicker.js';
+import { actionOf } from '../services/keybinds.js';
 import { BPM_MIN, BPM_MAX } from './tempo.js';
 
 const P = { mode: 'tap', level: 2, custom: ['basic', 'eighths'], bpm: 100, meter: '4/4', bars: 8, click: true, mix: {} };  // mix: group -> MIX index
@@ -365,8 +366,9 @@ export function bindPractice() {
   }, { passive: false });
   st.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && run) { e.preventDefault(); stopPractice(T('Stopped. Press space or Start to try again.')); }
-    else if (e.key === 'Escape' && listenBag.length && practiceTab()) { e.preventDefault(); stopListen(); }
+    if (actionOf(e.code) !== 'stop' || isTyping(e.target)) return;
+    if (run) { e.preventDefault(); stopPractice(T('Stopped. Press space or Start to try again.')); }
+    else if (listenBag.length && practiceTab()) { e.preventDefault(); stopListen(); }
   });
   let rT = 0; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { if (practiceTab() && !run) draw(); }, 150); });
   // the tabs: #practice, anything else is the notation tool

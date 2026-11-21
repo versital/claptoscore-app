@@ -197,15 +197,13 @@
     </article>
   </section>
 
-  <dialog class="keys-help" id="helpKeys" aria-label="Keys">
-    <table>
-      <tbody><tr><td><kbd class="space" aria-label="Space"></kbd> <kbd>J</kbd> <kbd>K</kbd></td><td>Tap (alternate keys for fast rhythms)</td></tr>
-      <tr><td><kbd>F</kbd> <kbd>D</kbd></td><td>Low voice, with two voices (taps too with one voice)</td></tr>
-      <tr><td><kbd>A</kbd>–<kbd>Z</kbd> <kbd>0</kbd>–<kbd>9</kbd></td><td>Practice tab: every letter and digit key taps</td></tr>
-      <tr><td><kbd>T</kbd></td><td>Tap tempo</td></tr>
-      <tr><td><kbd>Enter</kbd> <kbd>Esc</kbd></td><td>Stop</td></tr>
-      <tr><td><i class="i i-mic"></i> <i class="i i-midi"></i></td><td>Claps and MIDI notes count as taps</td></tr>
-    </tbody></table>
+  <dialog class="keys-help wide" id="helpKeys" aria-label="Keys">
+    <h3 class="keys-title">Keys</h3>
+    <p>Press + and then a key to add it, × to remove one. Any number of keys per action, also none.</p>
+    <table class="key-table"><tbody id="keyTable"></tbody></table>
+    <label class="key-any"><input type="checkbox" id="anyKeyPractice" checked> In Practice, every letter and digit key taps too</label>
+    <p class="ib-note">The mouse, touch, the microphone and MIDI notes always tap. Esc also cancels a calibration.</p>
+    <button class="btn" id="keysReset">Reset to defaults</button>
     <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
   </dialog>
   <dialog class="keys-help" id="helpCalib" aria-label="Calibrate">

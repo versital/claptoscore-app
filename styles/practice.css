@@ -84,3 +84,17 @@ body:not([data-tab="practice"]) .practice { display: none; }
 .pr-mix-row .val { font: 600 10.5px/1 var(--mono); color: var(--ink-3); text-transform: uppercase; }
 .pr-stage.dragging { cursor: grabbing; }
 .dots .dot.grp { margin-left: 9px; }  /* additive meters: a gap before each group */
+
+/* Keys window */
+.keys-title { margin: 0 0 6px; font-size: 17px; }
+.key-table { width: 100%; margin: 6px 0 12px; }
+.keys-help .key-table td { text-align: left; padding: 8px 0; border-top: 1px solid var(--line); }
+.keys-help .key-table td:first-child { text-align: left; padding-right: 14px; white-space: normal; width: 38%; }
+.key-table small { text-transform: none; letter-spacing: 0; font-weight: 400; font-family: var(--body); display: block; color: var(--ink-3); font-size: 11.5px; line-height: 1.3; margin-top: 2px; }
+.key-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.key-chip { display: inline-flex; align-items: center; }
+.key-chip kbd { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.key-x { border: 1px solid var(--key-edge); border-left: 0; background: var(--key); color: var(--ink-3); font-size: 13px; line-height: 1; padding: 5px 6px; border-radius: 0 4px 4px 0; cursor: pointer; align-self: stretch; }
+.key-x:hover { color: var(--bad); }
+.key-add.on { background: var(--accent); color: var(--accent-ink); }
+.key-any { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin-bottom: 8px; }
