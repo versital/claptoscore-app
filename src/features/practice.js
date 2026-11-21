@@ -17,6 +17,7 @@ import { rec } from '../state.js';
 import { stopRecording } from './recorder.js';
 import { buildDots } from '../ui/beatDots.js';
 import { fillMeterSelect } from './meterPicker.js';
+import { drawBarBrackets, barBracketPad } from '../ui/barBrackets.js';
 import { actionOf } from '../services/keybinds.js';
 import { BPM_MIN, BPM_MAX } from './tempo.js';
 
@@ -67,9 +68,10 @@ function draw() {
   const barW = 70 + 30 * Math.max(M.beats, ...perBar);
   const w = Math.max(stage.clientWidth - 20, P.bars * barW);
   ABCJS.renderAbc('prScore', toAbc(R, { perLine: P.bars }), {
-    staffwidth: w, scale: 1.15, paddingleft: 0, paddingright: 20, paddingtop: 4, paddingbottom: 4,
+    staffwidth: w, scale: 1.15, paddingleft: 0, paddingright: 20, paddingtop: 4 + barBracketPad(M), paddingbottom: 4,
     foregroundColor: css('--paper-ink') || css('--ink'), add_classes: true,
   });
+  drawBarBrackets(el, M, css('--paper-ink') || css('--ink'));
   el.style.width = el.style.height = '';
   // map time -> x: note heads (by note), barlines, and the start of the first bar
   const base = el.getBoundingClientRect().left, mid = e => { const r = e.getBoundingClientRect(); return (r.left + r.right) / 2 - base; };
@@ -194,9 +196,10 @@ function finish() {
   $('#prSum').textContent = bits.join(' · ');
   // the whole rhythm, wrapped, with the same colours
   ABCJS.renderAbc('prFull', toAbc(R, { perLine: 4 }), {
-    staffwidth: Math.max(300, $('#prResults').clientWidth - 20), scale: 0.95, paddingleft: 0, paddingright: 0, paddingtop: 4, paddingbottom: 4,
+    staffwidth: Math.max(300, $('#prResults').clientWidth - 20), scale: 0.95, paddingleft: 0, paddingright: 0, paddingtop: 4 + barBracketPad(METERS[R.meter]), paddingbottom: 4,
     foregroundColor: css('--ink'), add_classes: true,
   });
+  drawBarBrackets($('#prFull'), METERS[R.meter], css('--ink'));
   const ex = exercise(R, 4);
   [...$('#prFull').querySelectorAll('.abcjs-note')].forEach((e, k) => {
     const r = s.notes[ex.heads[k]]; if (r) e.classList.add(r.tap < 0 ? 'pr-miss' : Math.abs(r.err) <= GOOD_MS ? 'pr-good' : 'pr-ok');

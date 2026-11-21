@@ -22,8 +22,8 @@ export const METER_IDS = ['2/4', '3/4', '4/4', '5/4', '6/8', '9/8', '12/8'];
 // Ticks stay 1/48 notes everywhere, so the writers need no change; only the beat length differs.
 //   Irrational meters (any other denominator, 2 to 64: 4/3, 5/6, 7/12, 3/5 …): the beat is 1/d of a whole note,
 //   which has no note value of its own. They are written as the meter with the next lower power of two
-//   (4/3 -> 4/2, 5/6 -> 5/4, 7/12 -> 7/8, 3/5 -> 3/4), every note implicitly a d:D tuplet (3:2, 5:4 …): the
-//   score shows the real time signature and the ratio by the tempo; timing and detection are the written meter's
+//   (4/3 -> 4/2, 5/6 -> 5/4, 7/12 -> 7/8, 3/5 -> 3/4), every bar one d:D tuplet (3:2, 5:4 …): the score shows
+//   the real time signature and a ratio bracket over every bar (ui/barBrackets.js); timing and detection are the written meter's
 //   (the tempo is per beat either way). M.irr = { d, D }; M.written = the written meter (MusicXML and MIDI use it).
 export const MAX_NUM = 32, DENOMS = [2, 4, 8, 16], MAX_DEN = 64;
 export function parseMeter(id) {
@@ -42,8 +42,8 @@ export function parseMeter(id) {
 }
 // The meter as written in exports that need a power-of-two denominator (MusicXML, MIDI): 4/3 -> 4/2.
 export const writtenMeter = (id, M) => (M && M.written) || id;
-// ABC tempo line: an irrational meter names its ratio ("3:2" before the beat note).
-export const abcTempo = (M, bpm) => `Q:${M.irr ? `"${M.irr.p}:${M.irr.q}" ` : ''}${beatUnit(M).abc}=${Math.round(bpm)}`;
+// ABC tempo line (the beat note of an irrational meter is its written note: a half note in 4/3)
+export const abcTempo = (M, bpm) => `Q:${beatUnit(M).abc}=${Math.round(bpm)}`;
 // The beat numbers (within a bar) where a group starts, for additive meters; null otherwise.
 export function groupStarts(M) {
   if (!M.groups) return null;

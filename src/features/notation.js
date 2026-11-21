@@ -6,6 +6,7 @@ import { analyze } from '../core/analyze.js';
 import { toAbc } from '../core/abc.js';
 import { $, css } from '../ui/dom.js';
 import { drawChart } from './chart.js';
+import { drawBarBrackets, barBracketPad } from '../ui/barBrackets.js';
 import { countMode } from './counting.js';
 import { updateShare, sharePanelOpen } from './share.js';
 
@@ -98,7 +99,7 @@ export function render() {
   const room = box.clientWidth, w = Math.max(300, room - 10);
   if (window.ABCJS) {
     const draw = scale => ABCJS.renderAbc('score', abc, {
-      staffwidth: w, scale, paddingleft: 0, paddingright: 0, paddingtop: 6, paddingbottom: 6,
+      staffwidth: w, scale, paddingleft: 0, paddingright: 0, paddingtop: 6 + barBracketPad(A.M), paddingbottom: 6,
       foregroundColor: css('--ink'), add_classes: true,
     });
     const scale = w < 520 ? 0.85 : 1.1;
@@ -107,6 +108,7 @@ export function render() {
     const drawn = box.querySelector('svg')?.getBoundingClientRect().width || 0;
     if (room > 0 && drawn > room + 2) draw(scale * room / drawn * 0.98);  // (room 0: hidden, nothing to fit)
     relabelTuplets(box, labels);
+    drawBarBrackets(box, A.M, css('--ink'));
     box.style.width = '';  // let the paper fill the panel again
   } else $('#score').innerHTML = `<p>${T('Notation library failed to load. The ABC source below is still valid.')}</p>`;
   // Just the size of the result; how the taps were corrected shows in the timing chart.

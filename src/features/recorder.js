@@ -16,6 +16,7 @@ import { $, css, flash, reducedMotion } from '../ui/dom.js';
 import { finishCalib } from './calibration.js';
 import { buildFinest, syncControls } from './cleanup.js';
 import { render, relabelTuplets } from './notation.js';
+import { drawBarBrackets, barBracketPad } from '../ui/barBrackets.js';
 
 const freeTake = taps => inferFreeTake(taps, rec.meter, { opt: S.opt, lat: latencies(), hintBpm: S.tempoHint ? S.bpm : null });
 
@@ -170,10 +171,11 @@ function liveRender() {
   const labels = [];
   if (window.ABCJS) {
     ABCJS.renderAbc('liveScore', toAbc(A, from, { lyrics: false, abcjs: labels }).replace(/^Q:.*\n/m, ''), {
-      staffwidth: w, scale: w < 420 ? 0.8 : 0.95, paddingleft: 0, paddingright: 0, paddingtop: 0, paddingbottom: 0,
+      staffwidth: w, scale: w < 420 ? 0.8 : 0.95, paddingleft: 0, paddingright: 0, paddingtop: barBracketPad(A.M), paddingbottom: 0,
       foregroundColor: css('--ink'), add_classes: true,
     });
     relabelTuplets(el, labels);
+    drawBarBrackets(el, A.M, css('--ink'));
   }
 }
 
