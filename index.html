@@ -90,7 +90,7 @@
     <article class="panel active" id="p2">
       <div class="panel-head"><span class="step-no">2</span><h2>Rhythm</h2><span class="hint-r" id="p2hint">96 BPM · 4/4</span></div>
       <div class="pad pad-lg" id="rhythmPad" role="button" aria-label="Rhythm tap pad">
-        <span class="pad-voice l" hidden>F · low</span><span class="pad-voice r" hidden="">J / Space · high</span>
+        <span class="pad-voice l" hidden>F / D · low</span><span class="pad-voice r" hidden="">J / K / Space · high</span>
         <div class="pad-main" id="padMain">Click or space</div>
         <div class="pad-sub" id="padSub"></div>
       </div>
@@ -160,7 +160,7 @@
         <div class="pr-roll" id="prRoll"><div id="prScore"></div></div>
         <div class="pr-head" id="prHead"></div>
         <div class="dots" id="prDots"></div>
-        <div class="pr-msg" id="prMsg">Press space, click here or press Start. After one bar of count-in, play the rhythm as the line passes it.</div>
+        <div class="pr-msg" id="prMsg">Press space, click here or press Start. After one bar of count-in, play the rhythm as the line passes it. Any letter key taps: alternate keys for fast notes.</div>
       </div>
       <div class="row pr-actions">
         <button class="btn primary" id="prStart"><span class="ic">●</span> Start</button>
@@ -188,8 +188,9 @@
 
   <dialog class="keys-help" id="helpKeys" aria-label="Keys">
     <table>
-      <tbody><tr><td><kbd class="space" aria-label="Space"></kbd> <kbd>J</kbd></td><td>Tap</td></tr>
-      <tr><td><kbd>F</kbd></td><td>Low voice, with two voices</td></tr>
+      <tbody><tr><td><kbd class="space" aria-label="Space"></kbd> <kbd>J</kbd> <kbd>K</kbd></td><td>Tap (alternate keys for fast rhythms)</td></tr>
+      <tr><td><kbd>F</kbd> <kbd>D</kbd></td><td>Low voice, with two voices (taps too with one voice)</td></tr>
+      <tr><td><kbd>A</kbd>–<kbd>Z</kbd> <kbd>0</kbd>–<kbd>9</kbd></td><td>Practice tab: every letter and digit key taps</td></tr>
       <tr><td><kbd>T</kbd></td><td>Tap tempo</td></tr>
       <tr><td><kbd>Enter</kbd> <kbd>Esc</kbd></td><td>Stop</td></tr>
       <tr><td><i class="i i-mic"></i> <i class="i i-midi"></i></td><td>Claps and MIDI notes count as taps</td></tr>
@@ -204,7 +205,7 @@
     <table>
       <tbody><tr><td>With metronome</td><td>Count-in, then tap along with the click.</td></tr>
       <tr><td>Free tempo</td><td>Tap without a click; the tempo and barlines are worked out afterwards, using your meter.</td></tr>
-      <tr><td><kbd>F</kbd></td><td>Two voices: F or the left half of the pad plays the low voice, and so do MIDI notes below middle C.</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Two voices: F or D, or the left half of the pad, plays the low voice, and so do MIDI notes below middle C.</td></tr>
     </tbody></table>
     <form method="dialog"><button class="btn icon small close" aria-label="Close" title="Close">✕</button></form>
   </dialog>

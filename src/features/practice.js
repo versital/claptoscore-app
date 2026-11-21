@@ -133,7 +133,14 @@ function start() {
   metroStart({
     bpm: R.bpm, meter: R.meter, mode: 'practice',
     audible: b => b < count || (P.click && b < count + beats),
-    onBeat: (b, perf) => { if (b === 0 && run) run.start = perf + count * beatMs; return b <= count + beats; },
+    onBeat: (b, perf) => {
+      if (b === 0 && run) {
+        run.start = perf + count * beatMs;
+        // animation frames stop in a hidden tab: a timer still ends the run
+        const r = run; r.timer = setTimeout(() => { if (run === r) finish(); }, r.start - performance.now() + r.end + 400);
+      }
+      return b <= count + beats;
+    },
   });
   const frame = () => {
     if (!run) return;
@@ -148,8 +155,6 @@ function start() {
     run.raf = requestAnimationFrame(frame);
   };
   run.raf = requestAnimationFrame(frame);
-  // animation frames stop in a hidden tab: a timer still ends the run
-  run.timer = setTimeout(() => { if (run) finish(); }, run.start - performance.now() + run.end + 400);
 }
 
 export function stopPractice(msg) {

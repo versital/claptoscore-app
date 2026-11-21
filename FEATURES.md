@@ -115,6 +115,8 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+| More tap keys (v0.3.1): Space / J / K for the high voice, F / D for the low voice (with one voice F and D tap too), so fast passages can alternate fingers | `input/keyboard.js` | ✅ browser |
+
 ### 5 · Practice tab (v0.3.0)
 | Feature | Module | Status |
 |---|---|---|
@@ -127,7 +129,7 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Results: **accuracy %** ring, notes-hit ring, misses, extra taps, average early/late, the whole rhythm in colour, New rhythm / Replay | `core/practice.js` `scoreRun` | ✅ tests |
 | Scoring: each note has a window of up to 150 ms (at most 45 % of the gap to its neighbours, so windows never overlap); within 30 ms = full marks, then down to half marks at the window edge; accuracy = points ÷ (notes + extra taps). Latency settings are applied | `core/practice.js` | ✅ tests |
 | **Hold** mode: each note's release is scored against its written end too (keys, mouse, touch) | `core/practice.js` `scoreRun({ hold })` | ✅ tests · browser |
-| Input: space / J / F, the stage itself (mouse, touch), microphone and MIDI; Esc or Stop ends a run; Listen plays the rhythm on a woodblock | `input/taps.js` routes taps to the tab that is showing | ✅ |
+| Input: space and every letter and digit key (alternate keys for fast rhythms; each key is held on its own), the stage itself (mouse, touch), microphone and MIDI; Esc or Stop ends a run; Listen plays the rhythm on a woodblock | `input/taps.js` routes taps to the tab that is showing | ✅ |
 
 **Performance:** `fitLine` (Follow drift, the default) runs in plain loops and skips points whose weight
 underflows to exactly 0: about 3× faster, with bit-identical results (golden tests). With the Tuplets key the
@@ -181,3 +183,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.2.1 | 2026-11-19 | After an adversarial test round: abcjs-drawable 10–13-lets, false-tuplet guards and plain-first tempo fit, exact share-link round trips (v1 = original rules, v2 with note ends), link size limits, 32nds with Tuplets off, two-voice shared rhythms keep long notes; *n*-let key icon. |
 | 0.2.2 | 2026-11-19 | After a second adversarial round: drawn 10–13-lets keep exact bar lengths (split brackets, no voice drift); tuplet-first tempo fit as a second opinion (better on tuplet-heavy takes); windowed local fits (dense takes 3–4× faster); share note shows the real bar count. |
 | 0.3.0 | 2026-11-21 | Practice tab: random rhythms by level (1–8 + custom), tempo, meter, length, count-in, scrolling line with a fixed playhead, live note colours, accuracy %; Tap and Hold modes. `tests/practice.test.js`. |
+| 0.3.1 | 2026-11-21 | More tap keys: J / K / Space high, F / D low (both tap with one voice); in Practice every letter and digit key taps. Fix: practice runs ended at once (the hidden-tab end timer started before the start time was known). |
