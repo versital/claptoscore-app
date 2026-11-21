@@ -11,7 +11,7 @@
 const gcd = (a, b) => { while (b) [a, b] = [b, a % b]; return a; };
 export const lcm = (a, b) => a / gcd(a, b) * b;
 
-const PLAIN_SIMPLE = new Set([1, 2, 4, 8]), PLAIN_COMPOUND = new Set([1, 3, 6, 12]);
+const PLAIN_SIMPLE = new Set([1, 2, 4, 8, 16]), PLAIN_COMPOUND = new Set([1, 3, 6, 12]);
 
 // How a cell is written: null for plain notes, or { p, q } = p notes in the time of q (the written value of one
 // tuplet note is span beats / q). Simple meters: q = largest power of two <= p (3:2, 5:4, 6:4, 7:4, 9..15:8).

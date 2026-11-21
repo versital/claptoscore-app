@@ -54,6 +54,11 @@ tests/tuplets.test.js tuplet detection, engraving invariants, writers and share-
 tests/practice.test.js practice rhythms (every level and meter) and scoring
 ```
 
+### Meters
+`METERS` holds the seven original meters and parses any other "n/d" (d = 2, 4, 8) on first use (`parseMeter`):
+`M.tpb` is then 24 (half-note beat), 6 (eighth-note beat) or 18 (compound). Use `beatUnit(M)` for the tempo's note
+value; never assume a beat is a quarter.
+
 ### Ticks and tuplets
 An analysis `A` has `A.tpb` ticks per beat: 12 per quarter normally, times a factor `u` when a tuplet (5-let, 7-let,
 32nds …) needs a finer grid (`A.tpb / A.M.tpb === u`). Code that works in ticks should use `A.tpb` / `A.barTicks`,

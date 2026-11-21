@@ -56,14 +56,14 @@
       <div class="panel-head"><span class="step-no">1</span><h2>Tempo</h2></div>
       <div class="tempo-row">
         <button class="round slower" id="bpmDown" aria-label="Slower">−</button>
-        <div class="bpm"><input id="bpm" type="text" inputmode="numeric" maxlength="3" autocomplete="off" value="96" aria-label="Tempo in BPM"><span>BPM</span></div>
+        <div class="bpm"><input id="bpm" type="text" inputmode="numeric" maxlength="4" autocomplete="off" value="96" aria-label="Tempo in BPM"><span>BPM</span></div>
         <button class="round faster" id="bpmUp" aria-label="Faster">+</button>
       </div>
       <div class="dots" id="dots1"><span class="dot down"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
       <div class="row">
         <button class="btn" id="tempoTap" title="Tap tempo"><i class="i i-tap"></i> Tap</button>
         <label>
-          <select id="meter" aria-label="Meter" title="Meter">
+          <select id="meter" class="meter-select" aria-label="Meter" title="Meter">
             <option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option>
             <option>6/8</option><option>9/8</option><option>12/8</option>
           </select>
@@ -143,11 +143,11 @@
         <div class="pr-field pr-tempo">
           <span class="opt-label">Tempo</span>
           <button class="btn icon small" id="prBpmDown" aria-label="Slower">−</button>
-          <input id="prBpm" type="text" inputmode="numeric" maxlength="3" autocomplete="off" value="100" aria-label="Tempo in BPM"><span class="pr-unit">BPM</span>
+          <input id="prBpm" type="text" inputmode="numeric" maxlength="4" autocomplete="off" value="100" aria-label="Tempo in BPM"><span class="pr-unit">BPM</span>
           <button class="btn icon small" id="prBpmUp" aria-label="Faster">+</button>
         </div>
         <label class="pr-field"><span class="opt-label">Meter</span>
-          <select id="prMeter" aria-label="Time signature">
+          <select id="prMeter" class="meter-select" aria-label="Time signature">
             <option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option>
             <option>6/8</option><option>9/8</option><option>12/8</option>
           </select></label>
@@ -362,6 +362,7 @@
     <ul>
       <li>Quarter, eighth and sixteenth notes, dotted values, ties and rests</li>
       <li>Eighth-note triplets in simple meters, and 6/8, 9/8 and 12/8 compound meters</li>
+      <li>Custom meters: choose Custom… under the meter and type any n/2, n/4 or n/8, such as 7/8, 5/8 or 2/2</li>
       <li>Tuplets: 5-, 6-, 7-, 9-, 10-, 11-, 12- and 13-lets, quarter- and half-note triplets, duplets and quadruplets, and 32nd notes</li>
       <li>Two voices on a percussion staff: F for the low voice, J or space for the high voice</li>
       <li>Free tempo takes without a metronome, with the tempo and barlines worked out afterwards</li>

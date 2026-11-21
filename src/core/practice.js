@@ -79,7 +79,15 @@ export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom
   let pool = poolFor(meter, { level, custom });
   // every bar must be fillable beat by beat: keep a one-beat pattern with at least one note
   if (!pool.some(x => x.p.b === 1 && x.p.n.length)) pool = pool.concat(poolFor(meter, { custom: ['basic'] }).filter(x => x.p.b === 1 && x.p.n.length));
-  const placed = [];  // [beat index, pattern]
+  // Patterns are written per quarter note (simple meters) or dotted quarter (compound), whatever the meter's beat:
+  // in 2/2 a bar holds 4 quarter slots, in 7/8 three and a half (the half is filled with eighth-note patterns).
+  const unitT = M.compound ? M.tpb : 12, units = M.compound ? M.beats : M.beats * M.tpb / 12, barT = M.beats * M.tpb;
+  const ids = new Set(pool.map(x => x.g));
+  const half = [P(0.5, 2, [[0, 1]])];
+  if (ids.has('eighths')) half.push(P(0.5, 2, []));
+  if (ids.has('sixteenths')) half.push(P(0.5, 4, [[0, 1], [1, 1]]));
+  if (ids.has('sixteenthRests')) half.push(P(0.5, 4, [[1, 1]]));
+  const placed = [];  // [tick at u = 1, pattern]
   const pick = (room, beat) => {
     // long patterns start on strong beats only (a half note on beat 1 or 3 in 4/4), and never cross the barline
     const ok = pool.filter(x => x.p.b <= room && (x.p.b === 1 || beat % x.p.b === 0 || (x.p.b === 3 && beat === 0)));
@@ -89,19 +97,19 @@ export function generate({ meter = '4/4', bpm = 100, bars = 8, level = 2, custom
   };
   for (let bar = 0; bar < bars; bar++) {
     let beat = 0, barNotes = 0;
-    while (beat < M.beats) {
-      let p = pick(M.beats - beat, beat);
+    while (beat < units) {
+      let p = units - beat >= 1 ? pick(Math.floor(units - beat), beat) : half[Math.floor(rand() * half.length)];
       // a bar of nothing but rests is no exercise: its last chance gets a note
-      if (!p.n.length && !barNotes && beat + p.b >= M.beats) p = pool.find(x => x.p.b === 1 && x.p.n.length).p;
-      placed.push([bar * M.beats + beat, p]);
+      if (!p.n.length && !barNotes && beat + p.b >= units) p = p.b < 1 ? half[0] : pool.find(x => x.p.b === 1 && x.p.n.length).p;
+      placed.push([bar * barT + beat * unitT, p]);
       barNotes += p.n.length; beat += p.b;
     }
   }
   // the finest tick grid the chosen patterns need (u = 5 for quintuplets, 7 for septuplets ...)
-  const u = placed.reduce((u, [, p]) => lcm(u, p.d / gcd(p.d, M.tpb)), 1), tpb = M.tpb * u, notes = [];
-  for (const [b, p] of placed) {
-    const s = tpb / p.d;
-    for (const [k, len] of p.n) notes.push({ start: b * tpb + k * s, end: b * tpb + (k + len) * s });
+  const u = placed.reduce((u, [, p]) => lcm(u, p.d / gcd(p.d, unitT)), 1), notes = [];
+  for (const [t0, p] of placed) {
+    const s = unitT * u / p.d;
+    for (const [k, len] of p.n) notes.push({ start: t0 * u + k * s, end: t0 * u + (k + len) * s });
   }
   return { meter, bpm, voices: [notes], u, title: '' };
 }

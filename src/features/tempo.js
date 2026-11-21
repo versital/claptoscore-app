@@ -8,6 +8,9 @@ import { buildDots } from '../ui/beatDots.js';
 import { noteGroup } from '../ui/noteIcons.js';
 import { $, flash } from '../ui/dom.js';
 
+// Tempo range: no musical limit, only what the field holds (4 digits) and the metronome can schedule.
+export const BPM_MIN = 1, BPM_MAX = 9999;
+
 let tempoTaps = [];
 // Tap tempo: median-filtered average of the last (up to 12) intervals; a 2.2 s pause starts over.
 export function tempoTap(time) {
@@ -26,11 +29,13 @@ export function tempoTap(time) {
 let restartTimer = 0;
 // restart: restart a running preview now; otherwise a running preview restarts after 600 ms of quiet.
 export function setBpm(v, restart = true) {
-  v = Math.max(30, Math.min(300, Math.round(v) || 96));
-  S.bpm = v; $('#bpm').value = v; store.set('bpm', v); updateHint();
+  v = Math.max(BPM_MIN, Math.min(BPM_MAX, Math.round(v) || 96));
+  S.bpm = v; $('#bpm').value = v; fitBpm(); store.set('bpm', v); updateHint();
   if (restart && metro.mode === 'preview') startPreview();
   else if (metro.mode === 'preview') { clearTimeout(restartTimer); restartTimer = setTimeout(startPreview, 600); }
 }
+// four digits get a smaller font, so the number still fits the display
+export const fitBpm = () => $('#bpm').classList.toggle('four', $('#bpm').value.length > 3);
 export function updateHint() { $('#p2hint').textContent = `${S.bpm} BPM · ${S.meter}`; $('#hintBpm').textContent = S.bpm; }
 
 export function setMetroBtn(on) {
@@ -52,7 +57,7 @@ export function bindTempo() {
   const f = $('#bpm');
   f.closest('.bpm').addEventListener('pointerdown', e => { if (e.target !== f) { e.preventDefault(); f.focus(); } });
   f.addEventListener('focus', () => setTimeout(() => f.select(), 0));
-  f.addEventListener('input', () => { f.value = f.value.replace(/\D/g, ''); });
+  f.addEventListener('input', () => { f.value = f.value.replace(/\D/g, ''); fitBpm(); });
   f.addEventListener('change', () => setBpm(+f.value));
   f.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); f.blur(); }

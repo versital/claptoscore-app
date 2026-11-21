@@ -1,4 +1,4 @@
-import { allowedDivs, COMPLEXITY_SIMPLE, COMPLEXITY_COMPOUND, COMPLEXITY_EXT_SIMPLE, COMPLEXITY_EXT_COMPOUND,
+import { allowedDivs, complexityFor, COMPLEXITY_SIMPLE, COMPLEXITY_COMPOUND, COMPLEXITY_EXT_SIMPLE, COMPLEXITY_EXT_COMPOUND,
   SIGMA_MS, SPANS, COMPLEXITY_SPAN, EMPTY_SLOT_COST, MIN_FILL, TUPLET_GAIN } from './meters.js';
 import { tupletOf } from './tuplets.js';
 
@@ -12,7 +12,8 @@ const CX_COMPOUND = { ...COMPLEXITY_EXT_COMPOUND, ...COMPLEXITY_COMPOUND };
 // cells (beat -> { b0, span, s }) for every beat it covers, spans included.
 export function quantize(p, M, o, beatMs, voices) {
   const divs = allowedDivs(M, o), maxS = Math.max(...divs), h = 0.5 / maxS;
-  const cx = o.tuplets ? (M.compound ? CX_COMPOUND : CX_SIMPLE) : (M.compound ? COMPLEXITY_COMPOUND : COMPLEXITY_SIMPLE);
+  const cx = !M.compound && M.tpb !== 12 ? complexityFor(M, o.tuplets)
+    : o.tuplets ? (M.compound ? CX_COMPOUND : CX_SIMPLE) : (M.compound ? COMPLEXITY_COMPOUND : COMPLEXITY_SIMPLE);
   const byBeat = new Map();
   p.forEach((x, i) => { const b = Math.floor(x + h); if (!byBeat.has(b)) byBeat.set(b, []); byBeat.get(b).push(i); });
   const q = new Array(p.length), grid = new Map();

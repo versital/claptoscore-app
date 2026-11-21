@@ -72,3 +72,7 @@ body:not([data-tab="practice"]) .practice { display: none; }
 .vol input[type="range"] { width: 110px; }
 .vol .val { font: 600 11px/1 var(--mono); min-width: 3.6em; color: var(--ink-3); }
 .vol-row { justify-content: flex-end; }
+
+/* custom meter field next to a meter menu */
+.meter-custom { width: 4.2em; font: 600 13px/1 var(--mono); padding: 6px 6px; text-align: center; margin-left: 6px; }
+.bpm input.four { font-size: 46px; width: calc(2.75em + 12px); }

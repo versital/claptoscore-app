@@ -1,3 +1,4 @@
+import { beatUnit } from './meters.js';
 import { barTokens } from './engrave.js';
 import { syllables } from './rhythmCode.js';
 import { abcTokens } from './abcText.js';
@@ -28,7 +29,7 @@ export function lyricLine(A, b0, b1, segs, count) {
 // abcjs: an array to fill with tuplet numbers; the text is then drawable by abcjs (see abcText.js).
 export function toAbc(A, fromBar = A.startBar, { lyrics = true, count = 'off', perLine = 4, abcjs = null } = {}) {
   const { M, R } = A;
-  const head = ['X:1', `M:${R.meter}`, 'L:1/48', `Q:${M.compound ? '3/8' : '1/4'}=${Math.round(R.bpm)}`];
+  const head = ['X:1', `M:${R.meter}`, 'L:1/48', `Q:${beatUnit(M).abc}=${Math.round(R.bpm)}`];
   const systems = [];
   for (let bar = fromBar; bar < A.endBar; bar += perLine) systems.push([bar, Math.min(A.endBar, bar + perLine)]);
   const lineFor = (segs, letter, [b0, b1], last) => {

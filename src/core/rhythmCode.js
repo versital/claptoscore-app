@@ -16,8 +16,11 @@
    With two voices, voice 1 is the high voice (snare, stems up) and voice 2 the low voice (kick).
 
    Version 2 (this build, for tuplets and 32nds): the same, with a varint u right after the tempo; ticks are then
-   12u per quarter. Version 1 is still written whenever the rhythm fits it, so ordinary links are unchanged. */
-import { METERS, METER_IDS } from './meters.js';
+   12u per quarter. Version 1 is still written whenever the rhythm fits it, so ordinary links are unchanged.
+   A custom meter (7/8, 2/2 …) has meter index 15 and needs version 2: two varints (numerator, denominator) follow u.
+   Version 2 also carries tempos outside the original 20–400 BPM. */
+const CUSTOM = 15, BPM_MIN = 1, BPM_MAX = 9999;
+import { METERS, METER_IDS, parseMeter, beatUnit } from './meters.js';
 import { barTokens } from './engrave.js';
 import { abcTokens } from './abcText.js';
 import { quantize } from './quantize.js';
@@ -86,13 +89,14 @@ function fitsV1(M, voices) {
 // r: { meter, bpm, voices: [[{start, end}], ...] (ticks from the first barline), title, hide, u? (ticks are 12u per
 // quarter; default 1) }
 export function encode(r) {
-  const mi = METER_IDS.indexOf(r.meter);
-  if (mi < 0) throw new Error('meter');
-  const two = r.voices.length > 1, u = r.u || 1;
-  const v2 = r.u !== undefined || !fitsV1(METERS[r.meter], two ? r.voices.slice(0, 2) : r.voices.slice(0, 1));
+  let mi = METER_IDS.indexOf(r.meter);
+  if (mi < 0) { if (!parseMeter(r.meter)) throw new Error('meter'); mi = CUSTOM; }
+  const two = r.voices.length > 1, u = r.u || 1, bpm = Math.max(BPM_MIN, Math.min(BPM_MAX, Math.round(r.bpm)));
+  const v2 = r.u !== undefined || mi === CUSTOM || bpm < 20 || bpm > 400 || !fitsV1(METERS[r.meter], two ? r.voices.slice(0, 2) : r.voices.slice(0, 1));
   const bytes = [v2 ? 2 : 1, mi | (r.hide ? HIDE : 0) | (two ? TWO : 0)];
-  putVar(bytes, Math.max(20, Math.min(400, Math.round(r.bpm))));
+  putVar(bytes, bpm);
   if (v2) putVar(bytes, u);
+  if (mi === CUSTOM) { const [n, d] = r.meter.split('/').map(Number); putVar(bytes, n); putVar(bytes, d); }
   for (const v of (two ? r.voices.slice(0, 2) : r.voices.slice(0, 1))) {
     const notes = [...v].sort((a, b) => a.start - b.start);
     putVar(bytes, notes.length);
@@ -109,12 +113,18 @@ export function decode(code) {
   const a = unb64u(code), pos = { i: 2 };
   if (a[0] !== 1 && a[0] !== 2) throw new Error('unknown version');
   if (code.length > MAX_CODE[a[0]]) throw new Error('not a rhythm code');
-  const meter = METER_IDS[a[1] & 15];
-  if (!meter) throw new Error('meter');
-  const bpm = getVar(a, pos);
-  if (bpm < 20 || bpm > 400) throw new Error('tempo');
-  const v2 = a[0] === 2, u = v2 ? getVar(a, pos) : 1;
+  let meter = METER_IDS[a[1] & 15];
+  const custom = (a[1] & 15) === CUSTOM;
+  if (!meter && !custom) throw new Error('meter');
+  const bpm = getVar(a, pos), v2 = a[0] === 2;
+  if (v2 ? bpm < BPM_MIN || bpm > BPM_MAX : bpm < 20 || bpm > 400) throw new Error('tempo');
+  const u = v2 ? getVar(a, pos) : 1;
   if (u < 1 || u > MAX_U) throw new Error('resolution');
+  if (custom) {
+    if (!v2) throw new Error('meter');
+    meter = getVar(a, pos) + '/' + getVar(a, pos);
+    if (!parseMeter(meter)) throw new Error('meter');
+  }
   const M = METERS[meter], barTicks = M.beats * M.tpb * u, limit = MAX_BARS * barTicks;
   const two = !!(a[1] & TWO), voices = [];
   let total = 0;
@@ -220,6 +230,12 @@ export function kodaly(notes, info) {
   return out;
 }
 export function syllables(notes, info, mode) {
+  // custom beat lengths (2/2, 7/8 …) count the beat like a quarter-note beat: rescale to 12 ticks per beat
+  if (!info.labels && !info.compound && info.tpb && info.tpb !== 12) {
+    const f = 12 / info.tpb;
+    notes = notes.map(n => ({ start: n.start * f, end: n.end * f }));
+    info = { ...info, tpb: 12 };
+  }
   const sorted = [...notes].sort((a, b) => a.start - b.start);
   return mode === 'kodaly' && !info.labels ? kodaly(sorted, info) : sorted.map(n => countSyllable(n.start, info));
 }
@@ -228,7 +244,7 @@ const lyricEsc = s => s.replace(/-/g, '\\-').replace(/ /g, '~');
 // ---------- ABC for a decoded rhythm (the share page and its exercise card) ----------
 export function toAbc(r, { count = 'off', perLine = 4, font = 'Geist 9' } = {}) {
   const A = layout(r), M = A.M;
-  const head = ['X:1', `M:${r.meter}`, 'L:1/48', `Q:${M.compound ? '3/8' : '1/4'}=${Math.round(r.bpm)}`];
+  const head = ['X:1', `M:${r.meter}`, 'L:1/48', `Q:${beatUnit(M).abc}=${Math.round(r.bpm)}`];
   const u = A.tpb / M.tpb, unit = u === 1 ? x => x : notes => notes.map(n => ({ start: n.start / u, end: n.end / u }));
   const systems = [];
   for (let bar = 0; bar < A.endBar; bar += perLine) systems.push([bar, Math.min(A.endBar, bar + perLine)]);

@@ -1,3 +1,4 @@
+import { beatUnit } from './meters.js';
 import { barTokens } from './engrave.js';
 
 // MusicXML 4.0 export (Pro). One percussion part; one voice = hand clap, two voices = snare (up) + kick (down).
@@ -8,7 +9,7 @@ const XML_TYPE = { 72: ['whole', 1], 48: ['whole', 0], 36: ['half', 1], 24: ['ha
 export function toMusicXml(A, { title, date = new Date().toISOString().slice(0, 10) }) {
   const { M, R, barTicks } = A, u = A.tpb / M.tpb;  // u > 1: finer ticks for tuplets (divisions 12u)
   const [num, den] = R.meter.split('/');
-  const quarterBpm = M.compound ? R.bpm * 1.5 : R.bpm;
+  const unit = beatUnit(M), quarterBpm = R.bpm * unit.quarters;
   const two = A.twoVoice;
   // voice 1: clap (one voice) or snare (two voices) on C5/B4 stems up; voice 2: kick on F4 stems down
   const voices = (two ? [1, 2] : [A.voices[0].v]).map(v => ({
@@ -50,7 +51,7 @@ export function toMusicXml(A, { title, date = new Date().toISOString().slice(0, 
     let m = `<measure number="${n}">`;
     if (n === 1) {
       m += `<attributes><divisions>${12 * u}</divisions><key><fifths>0</fifths></key><time><beats>${num}</beats><beat-type>${den}</beat-type></time><clef><sign>percussion</sign></clef></attributes>`;
-      m += `<direction placement="above"><direction-type><metronome><beat-unit>${M.compound ? 'quarter</beat-unit><beat-unit-dot/>' : 'quarter</beat-unit>'}<per-minute>${Math.round(R.bpm)}</per-minute></metronome></direction-type><sound tempo="${+quarterBpm.toFixed(2)}"/></direction>`;
+      m += `<direction placement="above"><direction-type><metronome><beat-unit>${unit.xml}</beat-unit>${unit.dot ? '<beat-unit-dot/>' : ''}<per-minute>${Math.round(R.bpm)}</per-minute></metronome></direction-type><sound tempo="${+quarterBpm.toFixed(2)}"/></direction>`;
     }
     voices.forEach((vo, k) => {
       if (k) m += `<backup><duration>${barTicks}</duration></backup>`;

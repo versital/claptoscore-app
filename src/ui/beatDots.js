@@ -3,9 +3,10 @@ import { METERS } from '../core/meters.js';
 import { metro, visQ } from '../audio/metronome.js';
 import { $ } from './dom.js';
 
-export function buildDots(meter) {
+// ids: which rows to rebuild (the Tempo/Rhythm rows follow the Tempo meter, #prDots the Practice meter)
+export function buildDots(meter, ids = ['#dots1', '#dots2']) {
   const M = METERS[meter];
-  for (const id of ['#dots1', '#dots2', '#prDots']) {
+  for (const id of ids) {
     const el = $(id); el.innerHTML = '';
     for (let i = 0; i < M.beats; i++) { const d = document.createElement('span'); d.className = 'dot' + (i === 0 ? ' down' : ''); el.appendChild(d); }
   }

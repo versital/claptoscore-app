@@ -16,6 +16,8 @@ import { finishCalib } from './calibration.js';
 import { rec } from '../state.js';
 import { stopRecording } from './recorder.js';
 import { buildDots } from '../ui/beatDots.js';
+import { fillMeterSelect } from './meterPicker.js';
+import { BPM_MIN, BPM_MAX } from './tempo.js';
 
 const P = { mode: 'tap', level: 2, custom: ['basic', 'eighths'], bpm: 100, meter: '4/4', bars: 8, click: true };
 let R = null;      // the current rhythm (rhythm-code object), its seed and note times
@@ -264,15 +266,15 @@ export function showPracticeTab(on) {
   document.body.dataset.tab = on ? 'practice' : 'notate';
   $$('.sitenav a[data-tab]').forEach(a => a.toggleAttribute('aria-current', a.dataset.tab === (on ? 'practice' : 'notate')));
   if (rec.state !== 'idle') stopRecording();
-  if (on) { buildDots(P.meter); if (!R) newRhythm(); else draw(); }
+  if (on) { buildDots(P.meter, ['#prDots']); if (!R) newRhythm(); else draw(); }
   else { stopPractice(); stopListen(); }
 }
 
 export function bindPractice() {
   Object.assign(P, store.get('practice') || {});
-  P.bpm = Math.min(300, Math.max(30, Math.round(+P.bpm) || 100));
+  P.bpm = Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(+P.bpm) || 100));
   if (!METERS[P.meter]) P.meter = '4/4';
-  $('#prBpm').value = P.bpm; $('#prMeter').value = P.meter; $('#prBars').value = String(P.bars); $('#prClick').checked = P.click;
+  $('#prBpm').value = P.bpm; fillMeterSelect($('#prMeter'), P.meter); $('#prBars').value = String(P.bars); $('#prClick').checked = P.click;
   $$('#prMode button').forEach(b => b.classList.toggle('on', b.dataset.v === P.mode));
   fillLevels();
   $('#prMode').addEventListener('click', e => {
@@ -285,9 +287,10 @@ export function bindPractice() {
     P.custom = [...$$('#prCustom input:checked')].map(x => x.value);
     if (!P.custom.length) { P.custom = ['basic']; $('#prCustom input[value=basic]').checked = true; toast(T('choose at least one kind of rhythm')); }
   }));
-  $('#prMeter').addEventListener('change', changed(() => { P.meter = $('#prMeter').value; fillLevels(); buildDots(P.meter); }));
+  $('#prMeter').addEventListener('change', changed(() => { P.meter = $('#prMeter').value; fillLevels(); buildDots(P.meter, ['#prDots']); }));
   $('#prBars').addEventListener('change', changed(() => { P.bars = +$('#prBars').value; }));
-  const setBpm = v => { P.bpm = Math.min(300, Math.max(30, Math.round(v) || P.bpm)); $('#prBpm').value = P.bpm; };
+  const setBpm = v => { P.bpm = Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v) || P.bpm)); $('#prBpm').value = P.bpm; };
+  $('#prBpm').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
   $('#prBpm').addEventListener('change', changed(() => setBpm(+$('#prBpm').value)));
   $('#prBpm').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
   $('#prBpmDown').addEventListener('click', changed(() => setBpm(P.bpm - 4)));

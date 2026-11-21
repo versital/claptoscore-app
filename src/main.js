@@ -20,7 +20,7 @@ import { tapDown } from './input/taps.js';
 import { bindPlayback } from './audio/playback.js';
 import { render } from './features/notation.js';
 import { bindChart } from './features/chart.js';
-import { bindTempo, subIcon, updateHint } from './features/tempo.js';
+import { bindTempo, subIcon, updateHint, fitBpm } from './features/tempo.js';
 import { bindCalibration, showLatency } from './features/calibration.js';
 import { bindRecorder } from './features/recorder.js';
 import { bindRecordOptions, setVoices, setTiming } from './features/recordOptions.js';
@@ -32,6 +32,7 @@ import { bindUpsell } from './features/proGate.js';
 import { bindTakes } from './features/takes.js';
 import { bindPractice } from './features/practice.js';
 import { bindClickVolume } from './features/clickVolume.js';
+import { fillMeterSelect, bindMeterSelect } from './features/meterPicker.js';
 
 // The original scripts were globals other site pages relied on; keep them reachable.
 Object.assign(window, { Pro, MidiIn, RhythmCode, noteGroup });
@@ -63,14 +64,15 @@ new MutationObserver(render).observe(document.documentElement, { attributes: tru
 const sb = store.get('bpm'), sm = store.get('meter'), sl = store.get('latency'), sml = store.get('micLatency'), so = store.get('opt'), sr = store.get('rec');
 if (sb) S.bpm = sb;
 { const qs = new URLSearchParams(location.search), qb = +qs.get('bpm'), qm = qs.get('meter');
-  if (qb >= 30 && qb <= 300) S.bpm = Math.round(qb);
+  if (qb >= 1 && qb <= 9999) S.bpm = Math.round(qb);
   if (qm && METERS[qm]) S.meter = qm; }
 if (sm && METERS[sm]) S.meter = sm;  // note: a stored meter wins over ?meter= (original behaviour)
 if (typeof sl === 'number') S.latency = sl;
 if (typeof sml === 'number') S.micLatency = sml;
 if (so) Object.assign(S.opt, so);
 bindMic();  // restores the stored mic sensitivity
-$('#bpm').value = S.bpm; $('#meter').value = S.meter; subIcon();
+$('#bpm').value = S.bpm; fitBpm(); fillMeterSelect($('#meter'), S.meter); subIcon();
+bindMeterSelect($('#meter')); bindMeterSelect($('#prMeter'));
 showLatency(); updateHint(); buildDots(S.meter);
 setVoices(!!store.get('twoVoices')); setTiming(!!store.get('free'));
 S.rec = sr && sr.taps && sr.taps.length ? sr : exampleTake(S.latency);

@@ -115,6 +115,9 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+| **Custom meters** (v0.4.0): "Custom…" in both meter menus takes any n/2, n/4 or n/8 (n up to 32); added meters are remembered in both menus. n/4 and n/2 count quarter and half notes, n/8 with n divisible by 3 (3/8, 15/8) counts dotted quarters like 6/8, other n/8 (5/8, 7/8, 11/8) count eighths. Detection, notation, counting, MusicXML/MIDI tempo, share links (rhythm-code v2, meter index 15 + n, d) and practice rhythms all follow | `core/meters.js` `parseMeter`, `features/meterPicker.js` | ✅ `tests/meters.test.js` · browser |
+| **No tempo limits** (v0.4.0): 1–9999 BPM (was 30–300) in both tabs, `?bpm=` and share links (tempos outside 20–400 use rhythm-code v2); 4-digit tempos get a smaller display font | `features/tempo.js`, `core/rhythmCode.js` | ✅ tests · browser |
+| Fix (v0.4.0): the Practice beat dots followed the Notate meter (e.g. 2 dots for a 9/8 rhythm when Notate was on 6/8), and opening Practice rebuilt the Notate dots with the Practice meter. Each row now follows its own meter | `ui/beatDots.js` | ✅ browser |
 | **Metronome volume** slider (0–150 %, remembered) in the Tempo panel and the Practice tab, kept in sync. All clicks go through their own gain node, so the rhythm sounds keep their level | `features/clickVolume.js`, `audio/context.js` `clickBus` | ✅ browser |
 | Listen (v0.3.3) scrolls the line with the sound: count-in dots, the playhead follows the audio clock and each note turns blue as it sounds; Esc stops it | `features/practice.js` `listen` | ✅ browser |
 | More tap keys (v0.3.1): Space / J / K for the high voice, F / D for the low voice (with one voice F and D tap too), so fast passages can alternate fingers | `input/keyboard.js` | ✅ browser |
@@ -188,3 +191,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.3.1 | 2026-11-21 | More tap keys: J / K / Space high, F / D low (both tap with one voice); in Practice every letter and digit key taps. Fix: practice runs ended at once (the hidden-tab end timer started before the start time was known). |
 | 0.3.2 | 2026-11-21 | Metronome volume slider (Tempo panel and Practice tab). |
 | 0.3.3 | 2026-11-21 | Practice: Listen scrolls the music along with the sound and lights each note as it plays. |
+| 0.4.0 | 2026-11-21 | Custom meters (n/2, n/4, n/8), no tempo limits (1–9999 BPM), practice beat dots follow the practice meter. `tests/meters.test.js`. |

@@ -1,8 +1,9 @@
+import { beatUnit } from './meters.js';
 // Standard MIDI File export (Pro): format 0, 480 ticks per quarter, drums on channel 10:
 // clap 39 (one voice) or snare 38 / kick 36 (two voices).
 export function toMidi(A) {
   const PPQ = 480, k = PPQ / (12 * (A.tpb / A.M.tpb)), origin = A.startBar * A.barTicks;  // 12u ticks per quarter
-  const quarterBpm = A.M.compound ? A.R.bpm * 1.5 : A.R.bpm;
+  const quarterBpm = A.R.bpm * beatUnit(A.M).quarters;
   const [num, den] = A.R.meter.split('/').map(Number);
   const vlq = n => { const b = [n & 0x7f]; while ((n >>= 7)) b.unshift((n & 0x7f) | 0x80); return b; };
   const ev = [];
