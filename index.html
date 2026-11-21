@@ -32,6 +32,7 @@
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/app.css">
 <link rel="stylesheet" href="./styles/theme.css">
+<link rel="stylesheet" href="./styles/practice.css">
 <!-- Notation engraver (classic script, sets window.ABCJS) -->
 <script src="./vendor/abcjs-basic-min.js"></script>
 <!-- Everything else is ES modules; see src/main.js -->
@@ -44,7 +45,7 @@
       <h1 translate="no">Clapto<span>score</span></h1>
       <p>Rhythm notation</p>
       <nav class="sitenav" aria-label="Site">
-        <a href="https://claptoscore.com/" aria-current="page">Notate</a><a href="https://claptoscore.com/lessons/">Lessons</a><a href="https://claptoscore.com/rhythms/">Rhythms</a><a href="https://claptoscore.com/metronome/">Metronome</a><a href="https://claptoscore.com/guide/rhythm-notation/">Guide</a><a href="https://claptoscore.com/pro/">Pro</a>
+        <a href="./" data-tab="notate" aria-current="page">Notate</a><a href="#practice" data-tab="practice">Practice</a><a href="https://claptoscore.com/lessons/">Lessons</a><a href="https://claptoscore.com/rhythms/">Rhythms</a><a href="https://claptoscore.com/metronome/">Metronome</a><a href="https://claptoscore.com/guide/rhythm-notation/">Guide</a><a href="https://claptoscore.com/pro/">Pro</a>
       </nav>
     </div>
     <button class="help-key inline hdr" data-help="helpKeys" aria-label="Keys" title="Keys">?</button>
@@ -129,6 +130,59 @@
           </div>
         </div>
       </details>
+    </article>
+  </section>
+
+  <section class="practice" id="practice">
+    <article class="panel active">
+      <div class="panel-head"><h2>Rhythm practice</h2><span class="hint-r" id="prHint"></span></div>
+      <div class="pr-controls">
+        <div class="seg" id="prMode"><button data-v="tap" class="on">Tap</button><button data-v="hold">Hold</button></div>
+        <label class="pr-field"><span class="opt-label">Level</span><select id="prLevel" aria-label="Level"></select></label>
+        <div class="pr-field pr-tempo">
+          <span class="opt-label">Tempo</span>
+          <button class="btn icon small" id="prBpmDown" aria-label="Slower">−</button>
+          <input id="prBpm" type="text" inputmode="numeric" maxlength="3" autocomplete="off" value="100" aria-label="Tempo in BPM"><span class="pr-unit">BPM</span>
+          <button class="btn icon small" id="prBpmUp" aria-label="Faster">+</button>
+        </div>
+        <label class="pr-field"><span class="opt-label">Meter</span>
+          <select id="prMeter" aria-label="Time signature">
+            <option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option>
+            <option>6/8</option><option>9/8</option><option>12/8</option>
+          </select></label>
+        <label class="pr-field"><span class="opt-label">Length</span>
+          <select id="prBars" aria-label="Length"><option value="2">2 bars</option><option value="4">4 bars</option><option value="8" selected>8 bars</option><option value="12">12 bars</option><option value="16">16 bars</option><option value="24">24 bars</option><option value="32">32 bars</option></select></label>
+        <label class="tog" title="Click while playing"><input type="checkbox" id="prClick" checked aria-label="Click while playing"><i class="i i-metronome"></i></label>
+      </div>
+      <div class="pr-custom" id="prCustom" hidden></div>
+      <div class="pr-stage" id="prStage" role="button" aria-label="Rhythm tap pad">
+        <div class="pr-title" id="prTitle">Rhythm</div>
+        <div class="pr-roll" id="prRoll"><div id="prScore"></div></div>
+        <div class="pr-head" id="prHead"></div>
+        <div class="dots" id="prDots"></div>
+        <div class="pr-msg" id="prMsg">Press space, click here or press Start. After one bar of count-in, play the rhythm as the line passes it.</div>
+      </div>
+      <div class="row pr-actions">
+        <button class="btn primary" id="prStart"><span class="ic">●</span> Start</button>
+        <button class="btn" id="prListen"><span class="ic">▶</span> Listen</button>
+        <button class="btn" id="prNew">New rhythm</button>
+        <span class="ib-note" id="prModeNote"></span>
+      </div>
+      <div class="pr-results" id="prResults" hidden>
+        <h3 id="prResTitle">Rhythm</h3>
+        <div class="pr-rings">
+          <div class="pr-ring" id="prAcc"><b>0%</b><span>Accuracy</span></div>
+          <div class="pr-ring hits" id="prHits"><b>0/0</b><span>Notes hit</span></div>
+        </div>
+        <p class="pr-sum" id="prSum"></p>
+        <div class="row pr-actions center"><button class="btn primary" id="prAgainNew">New rhythm</button><button class="btn" id="prReplay">Replay</button></div>
+        <div id="prFull"></div>
+        <div class="legend">
+          <span><i style="background:var(--good)"></i>within 30 ms</span>
+          <span><i style="background:var(--warn)"></i>hit, but off</span>
+          <span><i style="background:var(--bad)"></i>missed</span>
+        </div>
+      </div>
     </article>
   </section>
 

@@ -5,7 +5,7 @@ import { $ } from './dom.js';
 
 export function buildDots(meter) {
   const M = METERS[meter];
-  for (const id of ['#dots1', '#dots2']) {
+  for (const id of ['#dots1', '#dots2', '#prDots']) {
     const el = $(id); el.innerHTML = '';
     for (let i = 0; i < M.beats; i++) { const d = document.createElement('span'); d.className = 'dot' + (i === 0 ? ' down' : ''); el.appendChild(d); }
   }
@@ -19,7 +19,7 @@ function frame() {
   const now = performance.now();
   while (visQ.length && visQ[0].perf <= now) {
     const { b } = visQ.shift();
-    const el = $(metro.mode === 'preview' ? '#dots1' : '#dots2');
+    const el = $(metro.mode === 'preview' ? '#dots1' : metro.mode === 'practice' ? '#prDots' : '#dots2');
     const dots = el.children;
     [...dots].forEach((d, i) => d.classList.toggle('on', i === b % metro.bpb));
     beatListeners.forEach(f => f(b));

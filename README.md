@@ -20,7 +20,7 @@ The microphone and Web MIDI need a secure context; `localhost`/`127.0.0.1` count
 ## Layout
 ```
 index.html            markup only (from the saved page, with extension junk and pre-rendered output removed)
-styles/               site.css (shared chrome) · fonts.css · app.css (was the inline <style>) · theme.css
+styles/               site.css (shared chrome) · fonts.css · app.css (was the inline <style>) · theme.css · practice.css
 vendor/               abcjs (notation engraver, sets window.ABCJS)
 original/             the zip as received: kept for reference and used by the golden tests
 src/
@@ -39,16 +39,19 @@ src/
     rhythmCode.js       share-link codec, counting syllables, exercise/grid helpers
     takes.js            example take, shared rhythm -> take, analysis -> shareable rhythm
     tuplets.js          tuplet cells, how each is written (p:q), tick-resolution factor u
+    practice.js         practice tab: random rhythms by level, scoring a run (accuracy)
     abcText.js          tokens -> ABC text (shared by abc.js and rhythmCode.js)
   audio/              context.js · sounds.js · metronome.js · playback.js · onsetWorklet.js
   input/              taps.js (router) · keyboard.js (keys + pad) · mic.js · midiIn.js · midiToggle.js
   features/           one file per panel/feature: tempo, calibration, recorder, recordOptions, notation (render),
-                      chart, cleanup (fine-tune), counting, share, exportMenu, takes, proGate, takeInfo
+                      chart, cleanup (fine-tune), counting, share, exportMenu, takes, proGate, takeInfo,
+                      practice (the Practice tab, #practice)
   services/           i18n.js (T, plural) · store.js (localStorage) · pro.js (licence)
   ui/                 dom.js helpers · beatDots · steps · noteIcons · buddy · helpDialogs · langOffer
 tests/golden.test.js  runs the original functions (cut from original/claptoscore.html) side by side with src/core
                       (with the Tuplets option off: the golden options leave it out)
 tests/tuplets.test.js tuplet detection, engraving invariants, writers and share-link round trips
+tests/practice.test.js practice rhythms (every level and meter) and scoring
 ```
 
 ### Ticks and tuplets

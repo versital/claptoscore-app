@@ -1,0 +1,67 @@
+/* Practice tab (features/practice.js). Built from the same pieces as the notation tool: the moulded body, seg
+   keys, buttons and paper; only the scrolling stage and the result rings are new. */
+
+/* tabs: the body carries data-tab; the notation tool and the practice section take turns */
+body[data-tab="practice"] .steps, body[data-tab="practice"] .result, body[data-tab="practice"] #howBox { display: none; }
+body:not([data-tab="practice"]) .practice { display: none; }
+
+.practice {
+  background: var(--surface); border: 1px solid var(--edge); border-radius: 10px; overflow: hidden;
+  box-shadow: inset 0 1px 0 var(--hi), 0 3px 0 var(--slab);
+}
+.practice .panel { display: flex; flex-direction: column; }
+.practice .panel::after { display: none; }
+
+.pr-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.pr-field { display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%; }
+.pr-field select { min-width: 0; max-width: min(100%, 340px); text-overflow: ellipsis; }
+.pr-tempo input { width: 3.2em; text-align: center; font: 600 15px/1 var(--mono); padding: 6px 4px; }
+.pr-unit { font: 600 10px/1 var(--body); letter-spacing: .07em; color: var(--ink-3); }
+
+.pr-custom { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; }
+.pr-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.pr-chk small { color: var(--ink-3); font: 10px/1 var(--mono); }
+
+/* the stage: paper with the music on one line, scrolled under a fixed playhead */
+.pr-stage {
+  position: relative; overflow: hidden; min-height: 200px; padding: 40px 0 64px;
+  background: var(--paper); color: var(--paper-ink); border-radius: 6px; box-shadow: var(--paper-frame);
+  cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.pr-roll { width: max-content; will-change: transform; }
+.pr-roll svg { display: block; }
+.pr-title { position: absolute; top: 10px; left: 0; right: 0; text-align: center; font: italic 600 17px/1.2 Georgia, "Times New Roman", serif; color: var(--paper-ink); }
+.pr-head { position: absolute; top: 34px; bottom: 56px; left: 0; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--c-yellow, #F5B800); pointer-events: none; }
+#prDots { position: absolute; left: 0; right: 0; bottom: 12px; }
+.pr-stage:has(.pr-msg:not([hidden])) #prDots { visibility: hidden; }
+.pr-msg {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); width: max-content; max-width: 90%;
+  padding: 6px 10px; border-radius: 5px; background: var(--surface); color: var(--ink-2); font-size: 12.5px; text-align: center;
+  box-shadow: 0 0 0 1px var(--line); pointer-events: none;
+}
+.pr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pr-actions.center { justify-content: center; }
+
+/* note colours (abcjs draws with fill attributes; CSS wins over those) */
+.pr-good, .pr-good * { fill: var(--good) !important; stroke: var(--good); }
+.pr-ok, .pr-ok * { fill: var(--warn) !important; stroke: var(--warn); }
+.pr-miss, .pr-miss * { fill: var(--bad) !important; stroke: var(--bad); }
+
+/* results */
+.pr-results { display: flex; flex-direction: column; gap: 14px; align-items: stretch; padding-top: 4px; }
+.pr-results h3 { text-align: center; font: italic 600 20px/1.2 Georgia, "Times New Roman", serif; margin: 0; }
+.pr-rings { display: flex; justify-content: center; gap: 28px; }
+.pr-ring {
+  --p: 0; position: relative; width: 104px; height: 104px; border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--surface-2) 0);
+  display: grid; place-items: center; align-content: center;
+}
+.pr-ring.hits { background: conic-gradient(var(--good) calc(var(--p) * 1%), var(--surface-2) 0); }
+.pr-ring::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 1px 0 var(--hi); }
+.pr-ring b, .pr-ring span { position: relative; }
+.pr-ring b { font: 600 22px/1 var(--mono); }
+.pr-ring span { font: 600 9.5px/1.4 var(--body); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.pr-sum { text-align: center; color: var(--ink-2); font-size: 13.5px; margin: 0; }
+#prFull { overflow-x: auto; }
+.pr-results .legend { justify-content: center; }
+@media (max-width: 520px) { .pr-msg { font-size: 11.5px; padding: 4px 8px; } .pr-ring { width: 92px; height: 92px; } }

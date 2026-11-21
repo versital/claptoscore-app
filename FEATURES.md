@@ -115,6 +115,20 @@ Features added in this build are in section 4, and rows marked **new** change an
 | Timing chart draws each tuplet's slots | `features/chart.js` | ✅ |
 | Free-tempo tempo search ignores tuplets (they would fit almost any tempo); the notation afterwards uses them | `core/freeTempo.js` | ✅ golden |
 
+### 5 · Practice tab (v0.3.0)
+| Feature | Module | Status |
+|---|---|---|
+| **Practice** tab in the site nav (`#practice`), next to Notate; same body, keys and paper as the notation tool. Switching tabs stops a recording or a run | `features/practice.js`, `styles/practice.css` | ✅ checked in the browser |
+| Random rhythms by level: 1 whole/half/quarter notes · 2 eighths · 3 triplets, dotted quarters, syncopation · 4 sixteenths, ties · 5 dotted eighths, sixteenth rests · 6 sextuplets, quarter and sixteenth triplets · 7 quintuplets · 8 septuplets, broken tuplets. A level mixes in everything below it; its new material weighs as much as all the older material together. Compound meters get their own set (duplets, quadruplets …) | `core/practice.js` `GROUPS`, `generate` | ✅ tests (every level × meter × 15 seeds: whole bars, every note drawn, link round trip) |
+| **Custom** level: tick any kinds of rhythm | `core/practice.js` `poolFor` | ✅ tests |
+| Tempo (30–300 BPM), meter (all 7), length (2–32 bars, default 8), click on/off; remembered | `features/practice.js` | ✅ |
+| One bar of count-in (beat dots), then the music scrolls past a fixed yellow playhead: the head moves to 30 % of the stage, the line scrolls under it, and at the end the head runs to the last barline | `features/practice.js` `place` (time → x from note heads and barlines) | ✅ checked in the browser |
+| Notes turn green (within 30 ms), ochre (hit, but off) or red (missed) as you play | `features/practice.js` `liveMark` | ✅ |
+| Results: **accuracy %** ring, notes-hit ring, misses, extra taps, average early/late, the whole rhythm in colour, New rhythm / Replay | `core/practice.js` `scoreRun` | ✅ tests |
+| Scoring: each note has a window of up to 150 ms (at most 45 % of the gap to its neighbours, so windows never overlap); within 30 ms = full marks, then down to half marks at the window edge; accuracy = points ÷ (notes + extra taps). Latency settings are applied | `core/practice.js` | ✅ tests |
+| **Hold** mode: each note's release is scored against its written end too (keys, mouse, touch) | `core/practice.js` `scoreRun({ hold })` | ✅ tests · browser |
+| Input: space / J / F, the stage itself (mouse, touch), microphone and MIDI; Esc or Stop ends a run; Listen plays the rhythm on a woodblock | `input/taps.js` routes taps to the tab that is showing | ✅ |
+
 **Performance:** `fitLine` (Follow drift, the default) runs in plain loops and skips points whose weight
 underflows to exactly 0: about 3× faster, with bit-identical results (golden tests). With the Tuplets key the
 per-point fits only sum points within 8 window widths (`localFits`, O(n·window)). The page reuses the last analysis
@@ -166,3 +180,4 @@ Nothing here is committed. Add an entry when we decide to build something, then 
 | 0.2.0 | 2026-11-19 | Tuplets (5- to 13-lets, sextuplets, multi-beat and compound tuplets), 32nd grid, rhythm-code v2, share links to `?r=`; `tests/tuplets.test.js`; faster Follow-drift fit, analysis reuse and coalesced slider redraws. |
 | 0.2.1 | 2026-11-19 | After an adversarial test round: abcjs-drawable 10–13-lets, false-tuplet guards and plain-first tempo fit, exact share-link round trips (v1 = original rules, v2 with note ends), link size limits, 32nds with Tuplets off, two-voice shared rhythms keep long notes; *n*-let key icon. |
 | 0.2.2 | 2026-11-19 | After a second adversarial round: drawn 10–13-lets keep exact bar lengths (split brackets, no voice drift); tuplet-first tempo fit as a second opinion (better on tuplet-heavy takes); windowed local fits (dense takes 3–4× faster); share note shows the real bar count. |
+| 0.3.0 | 2026-11-21 | Practice tab: random rhythms by level (1–8 + custom), tempo, meter, length, count-in, scrolling line with a fixed playhead, live note colours, accuracy %; Tap and Hold modes. `tests/practice.test.js`. |

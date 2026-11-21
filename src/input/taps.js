@@ -5,10 +5,12 @@ import { $, flash } from '../ui/dom.js';
 import { calibTap } from '../features/calibration.js';
 import { recordDown, recordUp, startRecording } from '../features/recorder.js';
 import { tempoTap } from '../features/tempo.js';
+import { practiceTab, practiceDown, practiceUp } from '../features/practice.js';
 
 // origin: 'tempo' (the TAP key or T), otherwise the rhythm: pad, space/J/F, mic, MIDI
 // v: voice (1 high, 2 low); key: what is held (for note lengths); src: 'key' | 'mic' | 'midi'
 export function tapDown(time, { origin = 'global', v = 1, key = null, src = 'key' } = {}) {
+  if (practiceTab() && !calib.active) { practiceDown(time, { origin, key, src }); return; }
   if (calib.active) { calibTap(time, src); flash($('#rhythmPad'), v); return; }
   if (rec.state !== 'idle') { recordDown(time, key, v, src); return; }
   if (origin === 'tempo') { tempoTap(time); return; }
@@ -17,4 +19,7 @@ export function tapDown(time, { origin = 'global', v = 1, key = null, src = 'key
   if (S.free) recordDown(time, key, v, src);
 }
 
-export function tapUp(time, key) { if (rec.state !== 'idle') recordUp(time, key); }
+export function tapUp(time, key) {
+  if (practiceTab()) { practiceUp(time, key); return; }
+  if (rec.state !== 'idle') recordUp(time, key);
+}
